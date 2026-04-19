@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full scroll-smooth [color-scheme:dark]">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WA Gateway — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .select2-container--default .select2-selection--single {
+        height: 44px;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 42px;
+        padding-left: 12px;
+        color: #e7eef6;
+      }
+      .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 42px;
+        right: 8px;
+      }
+      .select2-dropdown {
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 0.75rem;
+        overflow: hidden;
+        background: #0f141c;
+      }
+      .select2-search--dropdown {
+        padding: 8px;
+        background: rgba(0, 0, 0, 0.25);
+      }
+      .select2-container--default .select2-search--dropdown .select2-search__field {
+        border-radius: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(0, 0, 0, 0.45);
+        color: #e7eef6;
+      }
+      .select2-results__option {
+        padding: 9px 12px;
+        color: #d8e2ee;
+      }
+      .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+        background: #0284c7;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-full overflow-x-hidden bg-wg-bg0 bg-[radial-gradient(1200px_600px_at_10%_-10%,#132032_0%,transparent_55%),radial-gradient(900px_500px_at_100%_0%,#0d2620_0%,transparent_50%)] font-sans text-base leading-normal text-wg-text antialiased"
+  >
+    <div
+      class="pointer-events-none fixed inset-0 z-0 bg-[length:48px_48px] [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_20%,black,transparent)]"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="pointer-events-none fixed -left-20 -top-[120px] z-0 h-[420px] w-[420px] rounded-full bg-[#1a4d3a] opacity-35 blur-[90px]"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="pointer-events-none fixed -bottom-40 -right-[100px] z-0 h-[420px] w-[420px] rounded-full bg-[#1e3a5f] opacity-35 blur-[90px]"
+      aria-hidden="true"
+    ></div>
+
+    <header
+      class="relative z-[2] mx-auto flex max-w-[1180px] items-center justify-between gap-3 px-6 py-5"
+    >
+      <div class="flex min-w-[200px] flex-1 items-center gap-4">
+        <span
+          class="grid h-12 w-12 shrink-0 place-items-center rounded-[14px] border border-wg-accent/35 bg-gradient-to-br from-wg-accent/20 to-wg-accent/5 text-wg-accent"
+          aria-hidden="true"
+        >
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M12 2C6.48 2 2 6.15 2 11.25c0 1.8.52 3.48 1.42 4.93L2 22l6.08-1.58A9.9 9.9 0 0 0 12 20.5c5.52 0 10-4.15 10-9.25S17.52 2 12 2Z"
+              fill="currentColor"
+              opacity=".15"
+            />
+            <path
+              d="M17.5 14.2c-.25.12-1.47.72-1.7.8-.23.08-.4.12-.57-.12-.17-.25-.65-.8-.8-.96-.15-.17-.3-.18-.55-.06-.25.12-1.05.39-2 1.24-.74.66-1.24 1.47-1.38 1.72-.15.25-.02.38.11.5.12.12.25.3.38.45.12.15.17.25.25.42.08.17.04.32-.02.45-.06.12-.57 1.38-.78 1.89-.2.5-.42.43-.57.44l-.48.01c-.17 0-.45-.06-.68-.3-.23-.25-.9-.88-.9-2.15 0-1.27.92-2.5 1.05-2.67.12-.17 1.82-2.78 4.4-3.9 1.23-.53 2.15-.85 2.89-1.09 1.21-.39 2.31-.33 3.18.2.87.53 1.4 1.25 1.35 2.2-.05.95-.35 1.55-.6 1.8Z"
+              fill="currentColor"
+            />
+          </svg>
+        </span>
+        <div>
+          <h1 class="m-0 text-2xl font-bold tracking-tight">WA Gateway</h1>
+          <p class="mt-0.5 text-sm text-wg-muted">
+            <span id="userEmail"></span> · <span id="userRole"></span>
+          </p>
+        </div>
+      </div>
+      <nav
+        class="flex max-w-full flex-nowrap gap-1.5 overflow-x-auto rounded-xl border border-white/[0.08] bg-black/25 p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        aria-label="Bagian utama"
+      >
+        <button
+          type="button"
+          class="nav-tab rounded-lg border-0 bg-white/[0.07] px-3.5 py-2 text-sm font-semibold text-wg-text transition-colors"
+          data-tab="devices"
+        >
+          Device
+        </button>
+        <button
+          type="button"
+          class="nav-tab rounded-lg border-0 bg-transparent px-3.5 py-2 text-sm font-semibold text-wg-muted transition-colors hover:text-wg-text"
+          data-tab="send"
+        >
+          Kirim Pesan
+        </button>
+        <button
+          type="button"
+          class="nav-tab rounded-lg border-0 bg-transparent px-3.5 py-2 text-sm font-semibold text-wg-muted transition-colors hover:text-wg-text"
+          data-tab="contacts"
+        >
+          Kontak
+        </button>
+        <button
+          type="button"
+          class="nav-tab rounded-lg border-0 bg-transparent px-3.5 py-2 text-sm font-semibold text-wg-muted transition-colors hover:text-wg-text"
+          data-tab="users"
+          id="nav-users"
+        >
+          Users
+        </button>
+      </nav>
+      <div class="relative shrink-0">
+        <details class="group">
+          <summary
+            class="list-none cursor-pointer rounded-xl border border-white/[0.06] bg-white/[0.035] px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text"
+          >
+            Menu
+          </summary>
+          <div class="absolute right-0 z-20 mt-2 min-w-[150px] space-y-1 rounded-xl border border-white/[0.08] bg-[rgba(18,26,36,0.95)] p-2 shadow-wg backdrop-blur-md">
+            <button
+              type="button"
+              data-menu-tab="docs"
+              class="block w-full rounded-lg border border-transparent px-3 py-2 text-left text-sm font-semibold text-wg-muted transition hover:border-white/[0.08] hover:bg-white/[0.06] hover:text-wg-text"
+            >
+              API
+            </button>
+            <button
+              type="button"
+              data-menu-tab="profile"
+              class="block w-full rounded-lg border border-transparent px-3 py-2 text-left text-sm font-semibold text-wg-muted transition hover:border-white/[0.08] hover:bg-white/[0.06] hover:text-wg-text"
+            >
+              Profil
+            </button>
+            <a
+              class="block rounded-lg border border-transparent px-3 py-2 text-sm text-wg-muted no-underline transition hover:border-white/[0.08] hover:bg-white/[0.06] hover:text-wg-text"
+              href="/wa.html"
+              >Chat WA</a
+            >
+            <button
+              type="button"
+              class="block w-full rounded-lg border border-transparent px-3 py-2 text-left text-sm font-semibold text-wg-muted transition hover:border-white/[0.08] hover:bg-white/[0.06] hover:text-wg-text"
+              id="btnLogout"
+            >
+              Keluar
+            </button>
+          </div>
+        </details>
+      </div>
+    </header>
+
+    <main class="relative z-[1] mx-auto max-w-[1180px] px-6 pb-12">
+      <section
+        class="tab-panel mb-5 rounded-wg border border-white/[0.08] bg-[rgba(18,26,36,0.72)] p-5 shadow-wg backdrop-blur-[16px]"
+        data-panel="devices"
+      >
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2 class="m-0 text-[1.05rem] font-semibold">Device WhatsApp</h2>
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-3 py-2 text-xs font-semibold text-[#041208] transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+              id="btnOpenAddDevice"
+            >
+              Tambah device
+            </button>
+            <button
+              type="button"
+              class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+              id="btnReloadDevices"
+            >
+              Muat ulang
+            </button>
+          </div>
+        </div>
+        <div id="addDevicePanel" hidden class="mt-4 rounded-xl border border-white/10 bg-black/25 p-4">
+          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h3 class="m-0 text-base font-semibold" id="addDevicePanelTitle">Tambah device</h3>
+            <button
+              type="button"
+              id="btnCloseAddDevicePanel"
+              class="rounded-lg border border-dashed border-white/20 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text"
+              aria-label="Tutup form tambah device"
+            >
+              Tutup
+            </button>
+          </div>
+          <div class="mb-4 flex max-h-[min(55vh,420px)] flex-col gap-3.5 overflow-y-auto">
+            <label class="flex flex-col gap-1.5">
+              <span class="text-xs font-medium text-wg-muted">Label</span>
+              <input
+                type="text"
+                id="modalNewLabel"
+                maxlength="128"
+                placeholder="mis. Support Jakarta"
+                autocomplete="off"
+                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+              />
+              <small class="text-[0.72rem] text-wg-muted/90"
+                >Nama tampilan. Session ID di bawah otomatis dari label (format slug URL).</small
+              >
+            </label>
+            <label class="flex flex-col gap-1.5">
+              <span class="text-xs font-medium text-wg-muted">Session ID</span>
+              <input
+                type="text"
+                id="newSessionId"
+                readonly
+                maxlength="64"
+                placeholder="(otomatis)"
+                spellcheck="false"
+                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+              />
+              <small class="text-[0.72rem] text-wg-muted/90">1–64 karakter, awal huruf/angka. Huruf, angka, _, -</small>
+            </label>
+          </div>
+          <div class="flex flex-wrap justify-end gap-2">
+            <button
+              type="button"
+              id="btnCancelAddDevice"
+              class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text"
+            >
+              Batal
+            </button>
+            <button
+              type="button"
+              class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-4 py-2.5 text-sm font-semibold text-[#041208] transition hover:brightness-110"
+              id="btnAddDevice"
+            >
+              Tambah device
+            </button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse text-sm" id="deviceTable">
+            <thead>
+              <tr>
+                <th
+                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
+                >
+                  Session
+                </th>
+                <th
+                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
+                >
+                  Label
+                </th>
+                <th
+                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
+                >
+                  Status
+                </th>
+                <th class="border-b border-white/[0.08] px-3 py-2.5"></th>
+              </tr>
+            </thead>
+            <tbody id="deviceTableBody"></tbody>
+          </table>
+          <p class="mt-2 text-sm text-wg-muted" id="deviceEmpty" hidden>
+            Belum ada device. Gunakan tombol Tambah device.
+          </p>
+        </div>
+        <div id="qrPanel" hidden class="mt-4 rounded-xl border border-white/10 bg-black/25 p-4">
+          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h3 class="m-0 text-base font-semibold" id="qrModalTitle">QR</h3>
+            <button
+              type="button"
+              class="rounded-lg border border-dashed border-white/20 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text"
+              data-close-qr="1"
+            >
+              Tutup
+            </button>
+          </div>
+          <div
+            class="relative grid min-h-[260px] place-items-center overflow-hidden rounded-[14px] border border-dashed border-white/[0.08] bg-black/40"
+          >
+            <img
+              id="qrModalImg"
+              alt="QR"
+              class="h-auto max-w-[260px] w-full [image-rendering:pixelated]"
+              hidden
+            />
+            <p class="max-w-[280px] p-6 text-center text-sm text-wg-muted" id="qrModalWait">Memuat QR…</p>
+          </div>
+          <p class="mt-3 text-sm text-wg-muted">WhatsApp → Setelan → Tautkan perangkat</p>
+        </div>
+      </section>
+
+      <section
+        class="tab-panel mb-5 hidden rounded-wg border border-white/[0.08] bg-[rgba(18,26,36,0.72)] p-5 shadow-wg backdrop-blur-[16px]"
+        data-panel="send"
+      >
+        <header class="mb-6 border-b border-white/[0.06] pb-5">
+          <h2 class="m-0 text-xl font-semibold tracking-tight text-wg-text">Kirim pesan</h2>
+          <p class="mt-1.5 max-w-2xl text-sm leading-relaxed text-wg-muted">
+            Pilih device WhatsApp, isi nomor tujuan, lalu kirim teks atau lampiran (gambar / dokumen).
+          </p>
+        </header>
+
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
+          <div
+            class="flex min-w-0 flex-col gap-3 rounded-2xl border border-white/[0.06] bg-black/25 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+          >
+            <div class="flex items-start gap-3">
+              <span
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-wg-accent/12 text-wg-accent"
+                aria-hidden="true"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                  <path d="M12 18h.01" />
+                </svg>
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="m-0 text-sm font-semibold text-wg-text">Device</p>
+                <p class="mt-0.5 text-xs leading-snug text-wg-muted">Buka daftar → ketik untuk mencari session atau label.</p>
+              </div>
+            </div>
+            <select
+              id="selectSendDevice"
+              data-s2-placeholder="Pilih device…"
+              class="w-full min-h-[2.75rem]"
+            ></select>
+          </div>
+
+          <div
+            class="flex min-w-0 flex-col gap-3 rounded-2xl border border-white/[0.06] bg-black/25 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+          >
+            <div class="flex items-start gap-3">
+              <span
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-500/12 text-sky-300/90"
+                aria-hidden="true"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="m-0 text-sm font-semibold text-wg-text">Kontak (opsional)</p>
+                <p class="mt-0.5 text-xs leading-snug text-wg-muted">
+                  Buka daftar → cari nama / nomor / grup; pilih untuk mengisi nomor, atau &quot;Tanpa kontak&quot;.
+                </p>
+              </div>
+            </div>
+            <select
+              id="selectSendContact"
+              data-s2-placeholder="Opsional — pilih kontak…"
+              class="w-full min-h-[2.75rem]"
+            ></select>
+          </div>
+        </div>
+
+        <div
+          class="mt-5 space-y-5 rounded-2xl border border-white/[0.06] bg-black/[0.18] p-4 sm:p-5 lg:mt-6"
+        >
+          <label class="flex min-w-0 flex-col gap-2">
+            <span class="text-xs font-medium uppercase tracking-wide text-wg-muted">Nomor tujuan</span>
+            <input
+              type="tel"
+              id="sendPhone"
+              placeholder="6281234567890"
+              autocomplete="tel"
+              class="min-h-[2.75rem] rounded-xl border border-white/[0.09] bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition placeholder:text-wg-muted/60 focus:border-wg-accent/50 focus:ring-[3px] focus:ring-wg-accent/10"
+            />
+          </label>
+
+          <label class="flex min-w-0 flex-col gap-2">
+            <span class="text-xs font-medium uppercase tracking-wide text-wg-muted">Lampiran</span>
+            <input
+              type="file"
+              id="sendAttachment"
+              accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.csv"
+              class="block w-full min-h-[2.75rem] cursor-pointer rounded-xl border border-dashed border-white/[0.12] bg-black/30 px-3 py-2.5 text-sm text-wg-muted transition hover:border-wg-accent/35 hover:bg-black/40 file:mr-3 file:inline-flex file:h-9 file:cursor-pointer file:items-center file:rounded-lg file:border file:border-white/[0.08] file:bg-white/[0.06] file:px-3.5 file:text-xs file:font-medium file:text-wg-text file:shadow-sm file:transition file:hover:border-white/[0.12] file:hover:bg-white/[0.09]"
+            />
+            <small class="text-[0.72rem] leading-snug text-wg-muted/90"
+              >Gambar (JPEG, PNG, …) atau dokumen (PDF, Office, ZIP, …). Maks. 25 MB. Kolom <span class="font-medium text-wg-text">Pesan</span> dipakai sebagai caption jika ada lampiran.</small
+            >
+          </label>
+
+          <label class="flex min-w-0 flex-col gap-2">
+            <span class="text-xs font-medium uppercase tracking-wide text-wg-muted">Pesan</span>
+            <textarea
+              id="sendMessage"
+              rows="5"
+              class="min-h-[120px] resize-y rounded-xl border border-white/[0.09] bg-black/35 px-3.5 py-3 text-wg-text outline-none transition focus:border-wg-accent/50 focus:ring-[3px] focus:ring-wg-accent/10"
+            ></textarea>
+          </label>
+
+          <div class="flex flex-wrap items-center gap-3 pt-1">
+            <button
+              type="button"
+              class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-6 py-2.5 text-sm font-semibold text-[#041208] shadow-[0_8px_24px_rgba(37,211,102,0.22)] transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+              id="btnSend"
+            >
+              Kirim pesan
+            </button>
+            <span class="text-xs text-wg-muted">Enter tidak mengirim — gunakan tombol.</span>
+          </div>
+        </div>
+
+      </section>
+
+      <section
+        class="tab-panel mb-5 hidden rounded-wg border border-white/[0.08] bg-[rgba(18,26,36,0.72)] p-5 shadow-wg backdrop-blur-[16px]"
+        data-panel="contacts"
+      >
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2 class="m-0 text-[1.05rem] font-semibold">Kontak</h2>
+          <button
+            type="button"
+            class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+            id="btnReloadContacts"
+          >
+            Muat ulang
+          </button>
+        </div>
+        <div class="mb-4 flex flex-wrap gap-2">
+          <button
+            type="button"
+            class="rounded-lg border-0 px-3.5 py-2 text-sm font-semibold transition-colors bg-white/[0.07] text-wg-text"
+            id="btnContactsTabContacts"
+            data-contact-subtab="contacts"
+          >
+            Kontak
+          </button>
+          <button
+            type="button"
+            class="rounded-lg border-0 px-3.5 py-2 text-sm font-semibold transition-colors bg-transparent text-wg-muted hover:text-wg-text"
+            id="btnContactsTabGroups"
+            data-contact-subtab="groups"
+          >
+            Grup
+          </button>
+        </div>
+        <div id="contactSubtabContacts">
+          <div class="mb-5 flex flex-col gap-2.5">
+            <div class="flex flex-wrap items-end gap-4">
+              <label class="flex min-w-0 flex-[1_1_240px] flex-col gap-1.5">
+                <span class="text-xs font-medium text-wg-muted">Filter grup</span>
+                <select
+                  id="selectContactGroupFilter"
+                  data-s2-placeholder="Semua kontak…"
+                  class="w-full min-h-[2.65rem]"
+                ></select>
+              </label>
+              <label class="flex min-w-0 flex-[1_1_240px] flex-col gap-1.5">
+                <span class="text-xs font-medium text-wg-muted">Cari kontak</span>
+                <input
+                  type="search"
+                  id="contactSearch"
+                  placeholder="Nama atau nomor…"
+                  autocomplete="off"
+                  class="box-border min-h-[2.65rem] w-full rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition placeholder:text-wg-muted/70 focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+                />
+              </label>
+              <div class="flex flex-wrap gap-2 pb-0.5">
+                <button
+                  type="button"
+                  class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-4 py-2.5 text-sm font-semibold text-[#041208] transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+                  id="btnOpenAddContact"
+                >
+                  Tambah kontak
+                </button>
+              </div>
+            </div>
+            <small class="text-[0.72rem] text-wg-muted/90">Pilih grup seperti combobox device — bisa dicari di dalam daftar.</small>
+          </div>
+        </div>
+        <div id="contactSubtabGroups" hidden>
+          <div id="inlineGroupsPanel" class="mb-5 rounded-xl border border-white/10 bg-black/25 p-4">
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h3 class="m-0 text-base font-semibold">Kelola grup</h3>
+            </div>
+          <div class="flex max-h-[min(50vh,380px)] flex-col gap-3.5 overflow-y-auto">
+            <div class="flex flex-wrap items-end gap-4">
+              <label class="flex min-w-0 flex-1 flex-col gap-1.5">
+                <span class="text-xs font-medium text-wg-muted">Grup baru</span>
+                <input
+                  type="text"
+                  id="modalNewGroupName"
+                  maxlength="100"
+                  placeholder="mis. Pelanggan VIP"
+                  class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+                />
+              </label>
+              <button
+                type="button"
+                class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-4 py-2.5 text-sm font-semibold text-[#041208] transition hover:brightness-110"
+                id="btnModalAddGroup"
+              >
+                Tambah grup
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full border-collapse text-sm">
+                <thead>
+                  <tr>
+                    <th
+                      class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
+                    >
+                      Nama
+                    </th>
+                    <th class="border-b border-white/[0.08] px-3 py-2.5"></th>
+                  </tr>
+                </thead>
+                <tbody id="modalGroupsBody"></tbody>
+              </table>
+              <p class="mt-2 text-sm text-wg-muted" id="groupsModalEmpty" hidden>Belum ada grup.</p>
+            </div>
+          </div>
+          </div>
+        </div>
+        <div id="inlineContactPanel" hidden class="mb-5 rounded-xl border border-white/10 bg-black/25 p-4">
+          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h3 class="m-0 text-base font-semibold" id="contactModalTitle">Kontak</h3>
+            <button
+              type="button"
+              class="rounded-lg border border-dashed border-white/20 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text"
+              data-close-contact="1"
+            >
+              Batal
+            </button>
+          </div>
+          <div class="flex flex-col gap-3.5">
+            <input type="hidden" id="modalContactId" value="" />
+            <label class="flex flex-col gap-1.5">
+              <span class="text-xs font-medium text-wg-muted">Nama</span>
+              <input
+                type="text"
+                id="modalContactName"
+                maxlength="150"
+                placeholder="Nama kontak"
+                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+              />
+            </label>
+            <label class="flex flex-col gap-1.5">
+              <span class="text-xs font-medium text-wg-muted">Nomor</span>
+              <input
+                type="tel"
+                id="modalContactPhone"
+                placeholder="628…"
+                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+              />
+            </label>
+            <label class="flex flex-col gap-1.5">
+              <span class="text-xs font-medium text-wg-muted">Grup</span>
+              <select
+                id="selectModalContactGroup"
+                data-s2-placeholder="Pilih grup…"
+                class="w-full min-h-[2.65rem]"
+              ></select>
+            </label>
+          </div>
+          <div class="mt-4 flex flex-wrap justify-end gap-2">
+            <button
+              type="button"
+              class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text"
+              data-close-contact="1"
+            >
+              Batal
+            </button>
+            <button
+              type="button"
+              class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-4 py-2.5 text-sm font-semibold text-[#041208] transition hover:brightness-110"
+              id="btnModalContactSave"
+            >
+              Simpan
+            </button>
+          </div>
+        </div>
+        <div id="contactsTableWrap" class="overflow-x-auto">
+          <table class="w-full border-collapse text-sm">
+            <thead>
+              <tr>
+                <th
+                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
+                >
+                  Nama
+                </th>
+                <th
+                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
+                >
+                  Nomor
+                </th>
+                <th
+                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
+                >
+                  Grup
+                </th>
+                <th class="border-b border-white/[0.08] px-3 py-2.5"></th>
+              </tr>
+            </thead>
+            <tbody id="contactsBody"></tbody>
+          </table>
+          <p class="mt-2 text-sm text-wg-muted" id="contactsEmpty" hidden>Belum ada kontak.</p>
+        </div>
+      </section>
+
+      <section
+        class="tab-panel mb-5 hidden rounded-wg border border-white/[0.08] bg-[rgba(18,26,36,0.72)] p-5 shadow-wg backdrop-blur-[16px]"
+        data-panel="docs"
+      >
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2 class="m-0 text-[1.05rem] font-semibold">Dokumentasi API</h2>
+          <span
+            class="rounded-full border border-white/[0.07] bg-white/[0.04] px-2.5 py-1 text-[0.72rem] font-semibold uppercase tracking-wider text-wg-muted"
+            >Markdown</span
+          >
+        </div>
+        <p class="mb-4 text-sm text-wg-muted">
+          Autentikasi: cookie sesi, <code class="rounded bg-black/35 px-1.5 py-0.5 text-[0.78em]">Authorization: Bearer &lt;jwt&gt;</code>, atau
+          <code class="rounded bg-black/35 px-1.5 py-0.5 text-[0.78em]">x-api-key</code>.
+        </p>
+        <div class="mb-4">
+          <a
+            class="inline-flex rounded-[10px] border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-wg-muted no-underline transition-colors hover:border-white/[0.15] hover:text-wg-text"
+            href="/health"
+            target="_blank"
+            rel="noopener"
+            >/health</a
+          >
+        </div>
+        <pre
+          class="m-0 max-h-[min(70vh,720px)] overflow-auto whitespace-pre-wrap rounded-xl border border-white/[0.08] bg-black/35 p-4 text-[0.8rem] leading-snug"
+          id="docContent"
+          >Memuat…</pre
+        >
+      </section>
+
+      <section
+        class="tab-panel mb-5 hidden rounded-wg border border-white/[0.08] bg-[rgba(18,26,36,0.72)] p-5 shadow-wg backdrop-blur-[16px]"
+        data-panel="profile"
+      >
+        <header class="mb-5 border-b border-white/[0.06] pb-4">
+          <h2 class="m-0 text-xl font-semibold tracking-tight text-wg-text">Profil</h2>
+          <p class="mt-1.5 max-w-3xl text-sm leading-relaxed text-wg-muted">Perbarui nama, email akun, dan ganti password.</p>
+        </header>
+        <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div class="rounded-2xl border border-white/[0.06] bg-black/[0.2] p-4">
+            <h3 class="m-0 text-[0.95rem] font-semibold text-wg-text">Update profil</h3>
+            <label class="mt-3 flex flex-col gap-1.5">
+              <span class="text-xs font-medium text-wg-muted">Nama</span>
+              <input
+                type="text"
+                id="profileFullName"
+                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+              />
+            </label>
+            <label class="mt-3 flex flex-col gap-1.5">
+              <span class="text-xs font-medium text-wg-muted">Email</span>
+              <input
+                type="email"
+                id="profileEmail"
+                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+              />
+            </label>
+            <button
+              type="button"
+              class="mt-4 rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-4 py-2.5 text-sm font-semibold text-[#041208] transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+              id="btnUpdateProfile"
+            >
+              Simpan profil
+            </button>
+          </div>
+          <div class="rounded-2xl border border-white/[0.06] bg-black/[0.2] p-4">
+            <h3 class="m-0 text-[0.95rem] font-semibold text-wg-text">Ganti password</h3>
+            <label class="mt-3 flex flex-col gap-1.5">
+              <span class="text-xs font-medium text-wg-muted">Password lama</span>
+              <input
+                type="password"
+                id="profileCurrentPassword"
+                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+              />
+            </label>
+            <label class="mt-3 flex flex-col gap-1.5">
+              <span class="text-xs font-medium text-wg-muted">Password baru</span>
+              <input
+                type="password"
+                id="profileNewPassword"
+                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+              />
+            </label>
+            <button
+              type="button"
+              class="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+              id="btnUpdatePassword"
+            >
+              Ubah password
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="tab-panel mb-5 hidden rounded-wg border border-white/[0.08] bg-[rgba(18,26,36,0.72)] p-5 shadow-wg backdrop-blur-[16px]"
+        data-panel="webhooks"
+      >
+        <header class="mb-5 border-b border-white/[0.06] pb-4">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 class="m-0 text-xl font-semibold tracking-tight text-wg-text">Webhook per Device</h2>
+              <p class="mt-1.5 max-w-3xl text-sm leading-relaxed text-wg-muted">
+                Set URL webhook untuk masing-masing device. Event yang dikirim: incoming message, outgoing message, dan test event.
+              </p>
+            </div>
+            <button
+              type="button"
+              id="btnWebhookBack"
+              class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-3.5 py-2 text-xs font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98]"
+            >
+              Kembali ke device
+            </button>
+          </div>
+        </header>
+
+        <div class="grid grid-cols-1 gap-4 lg:max-w-3xl">
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-medium text-wg-muted">Device</span>
+            <select
+              id="webhookDevice"
+              data-s2-placeholder="Pilih device…"
+              class="min-h-[2.65rem] rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+            ></select>
+          </label>
+
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-medium text-wg-muted">Webhook URL</span>
+            <input
+              type="url"
+              id="webhookUrl"
+              placeholder="https://example.com/webhook"
+              class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+            />
+          </label>
+
+          <label class="inline-flex items-center gap-2">
+            <input type="checkbox" id="webhookEnabled" class="h-4 w-4 accent-wg-accent" checked />
+            <span class="text-sm text-wg-muted">Aktifkan webhook untuk device ini</span>
+          </label>
+
+          <div class="flex flex-wrap gap-2 pt-1">
+            <button
+              type="button"
+              id="btnWebhookSave"
+              class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-4 py-2.5 text-sm font-semibold text-[#041208] transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+            >
+              Simpan webhook
+            </button>
+            <button
+              type="button"
+              id="btnWebhookTest"
+              class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+            >
+              Test webhook
+            </button>
+            <button
+              type="button"
+              id="btnWebhookDelete"
+              class="rounded-xl border border-red-400/35 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-400 transition hover:bg-red-500/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+            >
+              Hapus webhook
+            </button>
+          </div>
+
+          <p class="m-0 text-xs text-wg-muted">
+            Endpoint akan menerima HTTP POST JSON. Referensi lengkap ada di tab API.
+          </p>
+        </div>
+      </section>
+
+      <section
+        class="tab-panel mb-5 hidden rounded-wg border border-white/[0.08] bg-[rgba(18,26,36,0.72)] p-5 shadow-wg backdrop-blur-[16px]"
+        data-panel="users"
+        id="panel-users"
+      >
+        <header class="mb-5 border-b border-white/[0.06] pb-4">
+          <h2 class="m-0 text-xl font-semibold tracking-tight text-wg-text">Users</h2>
+          <p class="mt-1.5 max-w-3xl text-sm leading-relaxed text-wg-muted">
+            Ringkasan semua pengguna: jumlah device, login terakhir, dan volume pesan yang tercatat dari API/dashboard (hari ini &amp; 7 hari).
+          </p>
+        </header>
+
+        <h3 class="mb-3 text-[0.95rem] font-semibold text-wg-text">Tambah pengguna</h3>
+        <div class="mb-4 flex flex-wrap items-end gap-4">
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-medium text-wg-muted">Nama</span>
+            <input
+              type="text"
+              id="admFullName"
+              class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+            />
+          </label>
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-medium text-wg-muted">Email</span>
+            <input
+              type="email"
+              id="admEmail"
+              class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+            />
+          </label>
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-medium text-wg-muted">Password</span>
+            <input
+              type="password"
+              id="admPassword"
+              class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+            />
+          </label>
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-medium text-wg-muted">Role</span>
+            <select
+              id="admRole"
+              data-s2-placeholder="Pilih role…"
+              class="min-h-[2.65rem] rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+            >
+              <option value="member">member</option>
+              <option value="admin">admin</option>
+            </select>
+          </label>
+          <label class="flex flex-row items-center gap-2">
+            <input type="checkbox" id="admGenKey" class="h-4 w-4 accent-wg-accent" />
+            <span class="text-sm text-wg-muted">Generate API key (tampil sekali)</span>
+          </label>
+          <button
+            type="button"
+            class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-4 py-2.5 text-sm font-semibold text-[#041208] transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+            id="btnCreateUser"
+          >
+            Buat pengguna
+          </button>
+        </div>
+        <h3 class="mb-3 mt-8 text-[0.95rem] font-semibold text-wg-text">Data pengguna</h3>
+        <div class="overflow-x-auto rounded-xl border border-white/[0.06] bg-black/20">
+          <table class="w-full border-collapse text-sm">
+            <thead>
+              <tr>
+                <th
+                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                >
+                  ID
+                </th>
+                <th
+                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                >
+                  Nama
+                </th>
+                <th
+                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                >
+                  Email
+                </th>
+                <th
+                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                >
+                  Role
+                </th>
+                <th
+                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                >
+                  Device
+                </th>
+                <th
+                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                >
+                  Terakhir login
+                </th>
+                <th
+                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  title="Pesan tercatat hari ini (timezone server)"
+                >
+                  Pesan hari ini
+                </th>
+                <th
+                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  title="7 hari terakhir"
+                >
+                  7 hari
+                </th>
+                <th
+                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                >
+                  API key
+                </th>
+                <th class="border-b border-white/[0.08] px-3 py-2.5"></th>
+              </tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+
+      </section>
+    </main>
+
+    <footer class="relative z-[1] mx-auto max-w-[1180px] px-6 pb-8">
+      <p class="m-0 text-center text-xs text-wg-muted/80">Labudda - Karena Digital Bukan Pilihan</p>
+    </footer>
+
+    <div
+      id="confirmModal"
+      class="fixed inset-0 z-[2147483647] hidden items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirmModalTitle"
+    >
+      <div class="w-full max-w-md rounded-2xl border border-white/[0.1] bg-[rgba(18,26,36,0.95)] p-5 shadow-wg">
+        <h3 id="confirmModalTitle" class="m-0 text-base font-semibold text-wg-text">Konfirmasi</h3>
+        <p id="confirmModalText" class="mb-0 mt-2 text-sm leading-relaxed text-wg-muted"></p>
+        <div class="mt-5 flex justify-end gap-2">
+          <button
+            type="button"
+            id="btnConfirmNo"
+            class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            id="btnConfirmYes"
+            class="rounded-xl border border-red-400/35 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-300 transition hover:bg-red-500/20"
+          >
+            Ya, lanjutkan
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="pointer-events-none fixed bottom-5 right-5 z-50 flex max-w-[min(380px,calc(100vw-2rem))] flex-col gap-2"
+      id="toasts"
+      aria-live="polite"
+    ></div>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script type="module" src="/dashboard.js"></script>
+  </body>
+</html>

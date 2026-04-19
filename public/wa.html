@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full scroll-smooth [color-scheme:dark]">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <title>Chat — WA Gateway</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="min-h-screen bg-wa-bg font-sans text-[#e9edef] antialiased">
+    <div id="waBoot" class="grid min-h-screen place-items-center text-wa-muted">
+      <p>Memuat…</p>
+    </div>
+    <div
+      id="waApp"
+      class="group hidden grid h-[100dvh] max-h-[100dvh] w-full grid-cols-[minmax(300px,32vw)_1fr] bg-wa-bg max-md:grid-cols-1 max-md:group-data-[state=chat]:[&>aside]:hidden max-md:group-data-[state=list]:[&>main]:hidden"
+      data-state="list"
+      hidden
+    >
+      <aside
+        class="flex min-w-0 flex-col border-r border-[rgba(134,150,160,0.15)] bg-wa-bg"
+        aria-label="Daftar chat"
+      >
+        <header class="flex items-center justify-between bg-wa-panel px-3.5 py-2.5">
+          <div class="flex items-center gap-2 text-[1.05rem] font-semibold">
+            <span
+              class="h-9 w-9 shrink-0 rounded-full bg-gradient-to-br from-[#25d366] to-[#128c7e] shadow-[0_1px_3px_rgba(0,0,0,0.35)]"
+              aria-hidden="true"
+            ></span>
+            <span>WhatsApp</span>
+          </div>
+          <a
+            href="/"
+            class="grid h-10 w-10 place-items-center rounded-full text-xl text-[#aebac1] no-underline transition hover:bg-white/[0.06] hover:text-[#e9edef]"
+            title="Dashboard"
+            >←</a
+          >
+        </header>
+        <div class="flex items-center gap-2 border-b border-[rgba(134,150,160,0.15)] px-3 py-2">
+          <label class="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span class="text-[0.68rem] font-medium uppercase tracking-wide text-wa-muted">Device</span>
+            <select
+              id="waSession"
+              class="w-full rounded-lg border border-[rgba(134,150,160,0.15)] bg-wa-panel px-2 py-1.5 text-sm text-[#e9edef] outline-none"
+            ></select>
+          </label>
+          <span
+            id="waConn"
+            class="shrink-0 rounded-md bg-[rgba(0,168,132,0.15)] px-2 py-1 text-[0.7rem] font-semibold uppercase text-[#53bdeb] whitespace-nowrap"
+            role="status"
+            >…</span
+          >
+        </div>
+        <div class="px-2.5 py-2">
+          <input
+            type="search"
+            id="waSearchChat"
+            placeholder="Cari atau mulai chat baru"
+            autocomplete="off"
+            class="w-full rounded-lg border-0 bg-wa-panel px-3 py-2.5 text-sm text-[#e9edef] outline-none placeholder:text-wa-muted"
+          />
+        </div>
+        <div id="waChatList" class="flex-1 overflow-y-auto"></div>
+      </aside>
+      <main class="relative flex min-w-0 flex-col bg-wa-chat-bg" aria-label="Percakapan">
+        <header
+          class="relative z-[2] border-b border-l border-[rgba(134,150,160,0.15)] bg-wa-panel px-4 py-2"
+          id="waMainHead"
+        >
+          <div class="flex items-center gap-3">
+            <button
+              type="button"
+              class="hidden h-10 w-10 items-center justify-center rounded-full text-xl text-[#aebac1] max-md:flex hover:bg-white/[0.06] hover:text-[#e9edef]"
+              id="waBackList"
+              title="Daftar chat"
+            >
+              ←
+            </button>
+            <div
+              class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#6b7b8c] text-sm font-semibold text-white"
+              id="waHeadAvatar"
+            >
+              ?
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="truncate text-base font-medium" id="waHeadTitle">Pilih chat</div>
+              <div class="mt-0.5 truncate text-[0.78rem] text-wa-muted" id="waHeadSub"></div>
+            </div>
+          </div>
+        </header>
+        <div class="pointer-events-none absolute inset-0 z-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_2px,rgba(255,255,255,0.03)_2px,rgba(255,255,255,0.03)_4px)] opacity-30"></div>
+        <div id="waMessages" class="relative z-[1] flex flex-1 flex-col gap-1 overflow-y-auto px-[4%] pb-4 pt-3"></div>
+        <footer
+          class="relative z-[2] border-t border-[rgba(134,150,160,0.15)] bg-wa-panel px-4 pb-2.5 pt-2"
+        >
+          <div class="flex items-end gap-2 rounded-lg bg-wa-panel-hover p-1.5 pl-2.5">
+            <textarea
+              id="waMsgInput"
+              class="max-h-[120px] min-h-[42px] flex-1 resize-none border-0 bg-transparent py-2 text-[0.95rem] text-[#e9edef] outline-none placeholder:text-wa-muted"
+              rows="1"
+              placeholder="Ketik pesan"
+              maxlength="4096"
+            ></textarea>
+            <button
+              type="button"
+              class="grid h-12 w-12 shrink-0 place-items-center rounded-full border-0 bg-wa-accent text-white transition hover:bg-wa-accent-dark disabled:cursor-not-allowed disabled:opacity-45"
+              id="waBtnSend"
+              title="Kirim"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+              </svg>
+            </button>
+          </div>
+          <p class="mt-1.5 text-[0.78rem] text-wa-muted" id="waSendHint" hidden>
+            Chat grup: kirim teks belum didukung dari UI ini.
+          </p>
+        </footer>
+      </main>
+    </div>
+    <script type="module" src="/wa-app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full scroll-smooth [color-scheme:dark]">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Masuk — WA Gateway</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body
+    class="flex min-h-full items-center justify-center overflow-x-hidden bg-wg-bg0 bg-[radial-gradient(1200px_600px_at_10%_-10%,#132032_0%,transparent_55%),radial-gradient(900px_500px_at_100%_0%,#0d2620_0%,transparent_50%)] font-sans text-wg-text antialiased"
+  >
+    <div
+      class="pointer-events-none fixed inset-0 z-0 bg-[length:48px_48px] [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_20%,black,transparent)]"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="pointer-events-none fixed -left-20 -top-[120px] z-0 h-[420px] w-[420px] rounded-full bg-[#1a4d3a] opacity-35 blur-[90px]"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="pointer-events-none fixed -bottom-40 -right-[100px] z-0 h-[420px] w-[420px] rounded-full bg-[#1e3a5f] opacity-35 blur-[90px]"
+      aria-hidden="true"
+    ></div>
+
+    <main class="relative z-[2] w-full max-w-[420px] p-6">
+      <div
+        class="rounded-wg border border-white/[0.08] bg-[rgba(18,26,36,0.72)] p-5 shadow-wg backdrop-blur-[16px]"
+      >
+        <div class="mb-5 flex items-center gap-4">
+          <span
+            class="grid h-12 w-12 shrink-0 place-items-center rounded-[14px] border border-wg-accent/35 bg-gradient-to-br from-wg-accent/20 to-wg-accent/5 text-wg-accent"
+            aria-hidden="true"
+          >
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 2C6.48 2 2 6.15 2 11.25c0 1.8.52 3.48 1.42 4.93L2 22l6.08-1.58A9.9 9.9 0 0 0 12 20.5c5.52 0 10-4.15 10-9.25S17.52 2 12 2Z"
+                fill="currentColor"
+                opacity=".15"
+              />
+              <path
+                d="M17.5 14.2c-.25.12-1.47.72-1.7.8-.23.08-.4.12-.57-.12-.17-.25-.65-.8-.8-.96-.15-.17-.3-.18-.55-.06-.25.12-1.05.39-2 1.24-.74.66-1.24 1.47-1.38 1.72-.15.25-.02.38.11.5.12.12.25.3.38.45.12.15.17.25.25.42.08.17.04.32-.02.45-.06.12-.57 1.38-.78 1.89-.2.5-.42.43-.57.44l-.48.01c-.17 0-.45-.06-.68-.3-.23-.25-.9-.88-.9-2.15 0-1.27.92-2.5 1.05-2.67.12-.17 1.82-2.78 4.4-3.9 1.23-.53 2.15-.85 2.89-1.09 1.21-.39 2.31-.33 3.18.2.87.53 1.4 1.25 1.35 2.2-.05.95-.35 1.55-.6 1.8Z"
+                fill="currentColor"
+              />
+            </svg>
+          </span>
+          <div>
+            <h1 class="m-0 text-[1.35rem] font-bold tracking-tight">WA Gateway</h1>
+            <p class="mt-0.5 text-sm text-wg-muted">Masuk untuk mengelola device & pesan.</p>
+          </div>
+        </div>
+        <form id="loginForm" class="flex flex-col gap-3.5">
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-medium text-wg-muted">Email</span>
+            <input
+              type="email"
+              name="email"
+              required
+              autocomplete="username"
+              class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+            />
+          </label>
+          <label class="flex flex-col gap-1.5">
+            <span class="text-xs font-medium text-wg-muted">Password</span>
+            <input
+              type="password"
+              name="password"
+              required
+              autocomplete="current-password"
+              class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+            />
+          </label>
+          <p class="m-0 text-sm text-wg-danger" id="loginErr" hidden></p>
+          <button
+            type="submit"
+            class="mt-2 w-full rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-4 py-2.5 text-sm font-semibold text-[#041208] transition hover:brightness-110 active:scale-[0.98] disabled:cursor-wait disabled:opacity-90"
+          >
+            Masuk
+          </button>
+        </form>
+      </div>
+    </main>
+    <script type="module" src="/login.js"></script>
+  </body>
+</html>
