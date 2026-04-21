@@ -34,7 +34,7 @@ import {
   getSessionQrController,
   getSessionStatusController,
 } from '../controllers/sessionController.js';
-import { sendController } from '../controllers/sendController.js';
+import { sendBulkController, sendController } from '../controllers/sendController.js';
 import { sendUploadMaybe } from '../middlewares/sendUpload.js';
 import { broadcastController } from '../controllers/broadcastController.js';
 import { broadcastGuardController } from '../controllers/broadcastGuardController.js';
@@ -93,6 +93,7 @@ router.get('/session/status/:session_id', requireDeviceAccess, asyncHandler(getS
 router.delete('/session/:session_id', requireDeviceAccess, asyncHandler(deleteDeviceController));
 
 router.post('/send', sendUploadMaybe, requireUserAuth, requireDeviceAccess, asyncHandler(sendController));
+router.post('/send-bulk', requireUserAuth, requireDeviceAccess, asyncHandler(sendBulkController));
 
 router.get('/contact-groups', asyncHandler(listContactGroupsController));
 router.post('/contact-groups', asyncHandler(createContactGroupController));

@@ -615,7 +615,10 @@ async function loadDevices() {
           : 'inline-block rounded-md px-2 py-0.5 text-[0.72rem] font-semibold uppercase text-wg-muted bg-white/[0.06]';
     tr.innerHTML = `
       <td class="border-b border-white/[0.08] px-3 py-2.5 text-left"><code class="font-mono text-[0.85em]">${escapeHtml(d.session_id)}</code></td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left">${escapeHtml(d.label || '—')}</td>
+      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left">
+        <div class="font-medium">${escapeHtml(d.label || '—')}</div>
+        <div class="mt-0.5 text-[0.78rem] text-wg-muted">${escapeHtml(formatDeviceIdentity(d))}</div>
+      </td>
       <td class="border-b border-white/[0.08] px-3 py-2.5 text-left"><span class="${pillCls}">${escapeHtml(d.status)}</span></td>
       <td class="border-b border-white/[0.08] px-3 py-2.5">
         <div class="flex flex-wrap gap-1.5 whitespace-nowrap">
@@ -1087,6 +1090,18 @@ function escapeHtml(s) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+/**
+ * @param {any} d
+ */
+function formatDeviceIdentity(d) {
+  const name = String(d?.wa_name || '').trim();
+  const number = String(d?.wa_number || '').trim();
+  if (name && number) return `${name} (${number})`;
+  if (name) return name;
+  if (number) return number;
+  return 'Belum terdeteksi';
 }
 
 async function connectDevice(sessionId) {

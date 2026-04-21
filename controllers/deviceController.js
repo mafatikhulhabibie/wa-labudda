@@ -16,6 +16,7 @@ import {
 export async function listDevicesController(req, res) {
   if (req.user.authVia === 'device_api_key' && req.authDevice) {
     const d = req.authDevice;
+    const runtime = whatsappManager.getPublicStatusIfLoaded(d.session_id);
     return res.json({
       devices: [
         {
@@ -26,7 +27,9 @@ export async function listDevicesController(req, res) {
           api_key_prefix: d.api_key_prefix || null,
           api_key_configured: Boolean(d.api_key_sha256),
           created_at: d.created_at,
-          status: whatsappManager.getPublicStatusIfLoaded(d.session_id).status,
+          status: runtime.status,
+          wa_name: runtime.wa_name,
+          wa_number: runtime.wa_number,
         },
       ],
     });
@@ -38,19 +41,29 @@ export async function listDevicesController(req, res) {
     }
     const devices = await listAllDevicesWithOwner();
     return res.json({
-      devices: devices.map((d) => ({
-        ...d,
-        status: whatsappManager.getPublicStatusIfLoaded(d.session_id).status,
-      })),
+      devices: devices.map((d) => {
+        const runtime = whatsappManager.getPublicStatusIfLoaded(d.session_id);
+        return {
+          ...d,
+          status: runtime.status,
+          wa_name: runtime.wa_name,
+          wa_number: runtime.wa_number,
+        };
+      }),
     });
   }
 
   const rows = await listDevicesByUserId(req.user.id);
   return res.json({
-    devices: rows.map((d) => ({
-      ...d,
-      status: whatsappManager.getPublicStatusIfLoaded(d.session_id).status,
-    })),
+    devices: rows.map((d) => {
+      const runtime = whatsappManager.getPublicStatusIfLoaded(d.session_id);
+      return {
+        ...d,
+        status: runtime.status,
+        wa_name: runtime.wa_name,
+        wa_number: runtime.wa_number,
+      };
+    }),
   });
 }
 

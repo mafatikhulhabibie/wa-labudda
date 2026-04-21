@@ -9,12 +9,24 @@ import { getConfig } from '../config/index.js';
  */
 function buildFonnteLikePayload(event, sessionId, data) {
   const firstIncoming = data?.summary?.[0] || null;
-  const sender = firstIncoming?.chat_jid || data?.chat_jid || data?.number || data?.sender || null;
-  const message =
-    firstIncoming?.text ||
-    data?.message ||
-    data?.text ||
-    '';
+  const firstMessage = Array.isArray(data?.messages) ? (data.messages[0] ?? null) : null;
+  const sender =
+    firstIncoming?.from_me
+      ? null
+      : firstMessage?.participant ||
+        firstIncoming?.participant_jid ||
+        firstIncoming?.chat_jid ||
+        firstMessage?.remoteJid ||
+        data?.chat_jid ||
+        data?.number ||
+        data?.sender ||
+        null;
+  const name = firstMessage?.pushName || data?.name || '';
+  const message = firstIncoming?.text || firstMessage?.text || data?.message || data?.text || '';
+  const url = firstMessage?.url || data?.url || '';
+  const filename = firstMessage?.filename || data?.filename || '';
+  const mimetype = firstMessage?.mimetype || data?.mimetype || '';
+  const extension = data?.extension || (mimetype.includes('/') ? mimetype.split('/')[1] : '');
 
   return {
     // Tetap mempertahankan format bawaan wa-server
@@ -26,12 +38,12 @@ function buildFonnteLikePayload(event, sessionId, data) {
     device: sessionId,
     sender,
     message,
-    member: firstIncoming?.participant_jid || data?.participant_jid || null,
-    name: data?.name || '',
+    member: firstIncoming?.participant_jid || firstMessage?.participant || data?.participant_jid || null,
+    name,
     location: data?.location || '',
-    url: data?.url || '',
-    filename: data?.filename || '',
-    extension: data?.extension || '',
+    url,
+    filename,
+    extension,
   };
 }
 

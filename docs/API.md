@@ -161,7 +161,7 @@ Setiap event dikirim via `POST` JSON ke URL webhook:
 }
 ```
 
-Jika env `WEBHOOK_PAYLOAD_MODE=fonnte`, payload tetap memuat field di atas, dan ditambah field root ala Fonnte:
+Jika env `WEBHOOK_PAYLOAD_MODE=fonnte`, payload tetap memuat field di atas, dan ditambah field root ala Fonnte (siap plug-and-play):
 
 ```json
 {
@@ -169,13 +169,23 @@ Jika env `WEBHOOK_PAYLOAD_MODE=fonnte`, payload tetap memuat field di atas, dan 
   "sender": "6281234567890@s.whatsapp.net",
   "message": "hai",
   "member": null,
-  "name": "",
+  "name": "Nama Pengirim",
   "location": "",
-  "url": "",
-  "filename": "",
-  "extension": ""
+  "url": "https://...",
+  "filename": "brosur.pdf",
+  "extension": "pdf"
 }
 ```
+
+Keterangan field Fonnte-like:
+
+- `device`: `session_id` device pengirim/penerima event
+- `sender`: JID chat pengirim (incoming) atau nomor tujuan (outgoing)
+- `name`: nama kontak dari WhatsApp (jika tersedia)
+- `message`: isi pesan teks/caption
+- `url`: URL media dari event incoming (jika tersedia dari payload WhatsApp)
+- `filename`: nama file lampiran dokumen
+- `extension`: ekstensi file (atau turunan dari MIME type)
 
 Event yang tersedia:
 
@@ -226,6 +236,65 @@ Jika memakai `x-api-key` device pada endpoint ini, respons **403**.
 Untuk `media_type: image`, MIME harus `image/*` (mis. JPEG, PNG, GIF, WebP).
 
 Device harus milik pengguna (atau admin mengakses device apa pun).
+
+Respons sukses:
+
+```json
+{
+  "success": true,
+  "status": true,
+  "message": "queued",
+  "detail": {
+    "session_id": "sales-01",
+    "number": "6281234567890",
+    "has_media": false,
+    "message": "Halo",
+    "message_id": "3EB0..."
+  }
+}
+```
+
+### `POST /api/send-bulk`
+
+Kirim teks ke banyak nomor dalam 1 request (diproses berurutan).
+
+```json
+{
+  "session_id": "sales-01",
+  "numbers": ["6281234567890", "628998887776"],
+  "message": "Halo dari gateway"
+}
+```
+
+Respons sukses:
+
+```json
+{
+  "success": true,
+  "status": true,
+  "message": "queued",
+  "detail": {
+    "session_id": "sales-01",
+    "total": 2,
+    "success": 1,
+    "failed": 1,
+    "results": [
+      {
+        "number": "6281234567890",
+        "status": true,
+        "message": "queued",
+        "message_id": "3EB0..."
+      },
+      {
+        "number": "628998887776",
+        "status": false,
+        "message": "Invalid phone number",
+        "code": 400
+      }
+    ]
+  }
+}
+```
 
 ---
 

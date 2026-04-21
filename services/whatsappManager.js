@@ -22,6 +22,17 @@ import { processIncomingAutoReply } from './autoResponderService.js';
 const waLogger = pino({ level: 'silent' });
 
 /**
+ * @param {string | null | undefined} userId
+ */
+function normalizeWaNumberFromUserId(userId) {
+  const raw = String(userId || '');
+  if (!raw) return null;
+  const left = raw.split(':')[0] || '';
+  const digits = left.replace(/\D/g, '');
+  return digits || null;
+}
+
+/**
  * @typedef {'connecting' | 'connected' | 'disconnected'} ApiConnectionStatus
  */
 
@@ -61,9 +72,12 @@ class ManagedSession {
   }
 
   toPublicStatus() {
+    const user = this.sock?.user || null;
     return {
       session_id: this.sessionId,
       status: this.apiStatus,
+      wa_name: user?.name || null,
+      wa_number: normalizeWaNumberFromUserId(user?.id),
     };
   }
 
@@ -209,8 +223,28 @@ class ManagedSession {
         messages: payload.messages?.map((m) => ({
           id: m.key?.id,
           remoteJid: m.key?.remoteJid,
+          participant: m.key?.participant || null,
           fromMe: m.key?.fromMe,
           messageTimestamp: m.messageTimestamp,
+          pushName: m.pushName || '',
+          text:
+            m.message?.conversation ||
+            m.message?.extendedTextMessage?.text ||
+            m.message?.imageMessage?.caption ||
+            m.message?.videoMessage?.caption ||
+            m.message?.documentMessage?.caption ||
+            '',
+          url:
+            m.message?.imageMessage?.url ||
+            m.message?.videoMessage?.url ||
+            m.message?.documentMessage?.url ||
+            '',
+          filename: m.message?.documentMessage?.fileName || '',
+          mimetype:
+            m.message?.imageMessage?.mimetype ||
+            m.message?.videoMessage?.mimetype ||
+            m.message?.documentMessage?.mimetype ||
+            '',
         })),
         summary,
       }).catch(() => {});
