@@ -5,7 +5,7 @@
 module.exports = {
   apps: [
     {
-      name: 'wa-gateway',
+      name: 'wa-labudda',
       script: 'app.js',
       cwd: __dirname,
       instances: 1,
