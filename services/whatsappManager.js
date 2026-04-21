@@ -17,6 +17,7 @@ import { InMemoryJobQueue } from './queue/inMemoryJobQueue.js';
 import { broadcastInbox } from './inboxSocket.js';
 import { summarizeMessagesUpsert } from '../utils/waUpsertSummary.js';
 import { dispatchDeviceWebhook } from './webhookDispatcher.js';
+import { processIncomingAutoReply } from './autoResponderService.js';
 
 const waLogger = pino({ level: 'silent' });
 
@@ -211,6 +212,15 @@ class ManagedSession {
           messageTimestamp: m.messageTimestamp,
         })),
       }).catch(() => {});
+      try {
+        await processIncomingAutoReply({
+          sessionId: this.sessionId,
+          payload,
+          sendTextToJid: (sid, jid, text) => this.manager.sendTextToJid(sid, jid, text),
+        });
+      } catch (err) {
+        logger.warn({ err, sessionId: this.sessionId }, 'auto responder handler failed');
+      }
       try {
         await this.manager._relayUiIncoming(this.sessionId, payload);
       } catch (err) {
@@ -490,6 +500,28 @@ export class WhatsAppManager {
       throw Object.assign(new Error('Session is not connected'), { status: 503, expose: true });
     }
 
+    return sess.sendQueue.enqueue(() => sess.sendText(jid, text));
+  }
+
+  /**
+   * @param {unknown} sessionIdRaw
+   * @param {unknown} jidRaw
+   * @param {unknown} messageRaw
+   */
+  async sendTextToJid(sessionIdRaw, jidRaw, messageRaw) {
+    const sessionId = assertValidSessionId(sessionIdRaw);
+    const sess = this.getSessionOrThrow(sessionId);
+    const jid = String(jidRaw || '').trim();
+    if (!jid) {
+      throw Object.assign(new Error('jid is required'), { status: 400, expose: true });
+    }
+    if (messageRaw === undefined || messageRaw === null || String(messageRaw).trim() === '') {
+      throw Object.assign(new Error('message is required'), { status: 400, expose: true });
+    }
+    const text = String(messageRaw);
+    if (sess.apiStatus !== 'connected' || !sess.sock?.user) {
+      throw Object.assign(new Error('Session is not connected'), { status: 503, expose: true });
+    }
     return sess.sendQueue.enqueue(() => sess.sendText(jid, text));
   }
 

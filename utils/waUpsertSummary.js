@@ -74,3 +74,5 @@ function extractDisplayText(msg) {
   if (msg.pollCreationMessage || msg.pollUpdateMessage) return '[Polling]';
   return '';
 }
+
+export { extractDisplayText };

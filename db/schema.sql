@@ -81,6 +81,32 @@ CREATE TABLE IF NOT EXISTS device_webhooks (
   CONSTRAINT fk_device_webhooks_device FOREIGN KEY (device_id) REFERENCES devices (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+/* Auto-responder per device (rule-based). */
+CREATE TABLE IF NOT EXISTS device_auto_reply_settings (
+  device_id BIGINT UNSIGNED NOT NULL,
+  enabled TINYINT(1) NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (device_id),
+  CONSTRAINT fk_auto_reply_settings_device FOREIGN KEY (device_id) REFERENCES devices (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS device_auto_reply_rules (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  device_id BIGINT UNSIGNED NOT NULL,
+  match_type ENUM('exact','contains','starts_with','regex') NOT NULL DEFAULT 'contains',
+  keyword VARCHAR(300) NOT NULL,
+  reply_text TEXT NOT NULL,
+  case_sensitive TINYINT(1) NOT NULL DEFAULT 0,
+  priority INT NOT NULL DEFAULT 100,
+  enabled TINYINT(1) NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_auto_reply_rules_device_priority (device_id, priority, id),
+  CONSTRAINT fk_auto_reply_rules_device FOREIGN KEY (device_id) REFERENCES devices (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /* Jadwal kirim broadcast (task queue berbasis DB). */
 CREATE TABLE IF NOT EXISTS scheduled_broadcast_jobs (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

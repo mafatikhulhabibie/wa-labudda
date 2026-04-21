@@ -61,6 +61,13 @@ import {
   testDeviceWebhookController,
   upsertDeviceWebhookController,
 } from '../controllers/webhookController.js';
+import {
+  createAutoReplyRuleController,
+  deleteAutoReplyRuleController,
+  getAutoReplyController,
+  updateAutoReplyController,
+  updateAutoReplyRuleController,
+} from '../controllers/autoReplyController.js';
 
 const router = Router();
 
@@ -101,6 +108,24 @@ router.get('/webhooks/:session_id', requireDeviceAccess, asyncHandler(getDeviceW
 router.put('/webhooks/:session_id', requireDeviceAccess, asyncHandler(upsertDeviceWebhookController));
 router.delete('/webhooks/:session_id', requireDeviceAccess, asyncHandler(deleteDeviceWebhookController));
 router.post('/webhooks/:session_id/test', requireDeviceAccess, asyncHandler(testDeviceWebhookController));
+
+router.get('/autoresponder/:session_id', requireDeviceAccess, asyncHandler(getAutoReplyController));
+router.put('/autoresponder/:session_id', requireDeviceAccess, asyncHandler(updateAutoReplyController));
+router.post(
+  '/autoresponder/:session_id/rules',
+  requireDeviceAccess,
+  asyncHandler(createAutoReplyRuleController),
+);
+router.patch(
+  '/autoresponder/:session_id/rules/:id',
+  requireDeviceAccess,
+  asyncHandler(updateAutoReplyRuleController),
+);
+router.delete(
+  '/autoresponder/:session_id/rules/:id',
+  requireDeviceAccess,
+  asyncHandler(deleteAutoReplyRuleController),
+);
 
 router.post('/broadcast', requireAdmin, asyncHandler(broadcastController));
 router.get('/broadcast/guard', requireAdmin, asyncHandler(broadcastGuardController));

@@ -165,6 +165,7 @@ Event yang tersedia:
 
 - `message.outgoing` — ketika API/dashboard mengirim pesan
 - `message.incoming` — ketika ada pesan masuk (ringkas dari `messages.upsert`)
+- `message.autoreply.sent` — ketika autoresponder mengirim balasan otomatis
 - `webhook.test` — event uji koneksi
 
 Contoh URL endpoint penerima (bebas milik Anda):
@@ -209,6 +210,57 @@ Jika memakai `x-api-key` device pada endpoint ini, respons **403**.
 Untuk `media_type: image`, MIME harus `image/*` (mis. JPEG, PNG, GIF, WebP).
 
 Device harus milik pengguna (atau admin mengakses device apa pun).
+
+---
+
+## Auto-responder (per device)
+
+Fitur ini membalas pesan masuk otomatis berdasarkan rule keyword per `session_id`.
+
+### `GET /api/autoresponder/:session_id`
+
+Ambil status autoresponder device + daftar rules.
+
+### `PUT /api/autoresponder/:session_id`
+
+Body:
+
+```json
+{ "enabled": true }
+```
+
+Menyalakan/mematikan autoresponder pada device tersebut.
+
+### `POST /api/autoresponder/:session_id/rules`
+
+Body:
+
+```json
+{
+  "match_type": "contains",
+  "keyword": "harga",
+  "reply_text": "Halo, untuk info harga silakan kirim format: PRODUK <nama>",
+  "case_sensitive": false,
+  "priority": 100,
+  "enabled": true
+}
+```
+
+`match_type`: `exact` | `contains` | `starts_with` | `regex`.
+
+### `PATCH /api/autoresponder/:session_id/rules/:id`
+
+Body sama seperti create rule.
+
+### `DELETE /api/autoresponder/:session_id/rules/:id`
+
+Hapus satu rule autoresponder.
+
+Catatan perilaku default:
+
+- hanya memproses pesan **masuk** (`from_me=false`)
+- melewati chat grup (`@g.us`)
+- ada cooldown balasan per chat untuk mencegah spam/loop
 
 ---
 
