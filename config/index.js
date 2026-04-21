@@ -46,6 +46,8 @@ export function getConfig() {
     webhookIncomingMessageUrl: process.env.WEBHOOK_INCOMING_MESSAGE_URL?.trim() || '',
     /** Device webhook payload format: default | fonnte */
     webhookPayloadMode: enumEnv('WEBHOOK_PAYLOAD_MODE', ['default', 'fonnte'], 'default'),
+    /** Fonnte-like payload: normalize sender/member to digit-only phone */
+    webhookNormalizeSenderDigits: boolEnv('WEBHOOK_NORMALIZE_SENDER_DIGITS', false),
     /** Queue backend label for ops / future BullMQ wiring */
     queueDriver: process.env.QUEUE_DRIVER || 'memory',
 

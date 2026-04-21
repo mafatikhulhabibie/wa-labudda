@@ -14,7 +14,8 @@ export async function ensureAutoReplySettings(deviceId) {
 export async function getAutoReplyConfigBySessionId(sessionId) {
   const [rows] = await getPool().query(
     `SELECT d.id AS device_id, d.user_id, d.session_id,
-            COALESCE(s.enabled, 0) AS enabled
+            COALESCE(s.enabled, 0) AS enabled,
+            COALESCE(s.default_reply_text, '') AS default_reply_text
      FROM devices d
      LEFT JOIN device_auto_reply_settings s ON s.device_id = d.id
      WHERE d.session_id = :session_id
@@ -27,13 +28,20 @@ export async function getAutoReplyConfigBySessionId(sessionId) {
 /**
  * @param {number} deviceId
  * @param {boolean} enabled
+ * @param {string} defaultReplyText
  */
-export async function upsertAutoReplySettings(deviceId, enabled) {
+export async function upsertAutoReplySettings(deviceId, enabled, defaultReplyText = '') {
   await getPool().query(
-    `INSERT INTO device_auto_reply_settings (device_id, enabled)
-     VALUES (:device_id, :enabled)
-     ON DUPLICATE KEY UPDATE enabled = VALUES(enabled)`,
-    { device_id: deviceId, enabled: enabled ? 1 : 0 },
+    `INSERT INTO device_auto_reply_settings (device_id, enabled, default_reply_text)
+     VALUES (:device_id, :enabled, :default_reply_text)
+     ON DUPLICATE KEY UPDATE
+       enabled = VALUES(enabled),
+       default_reply_text = VALUES(default_reply_text)`,
+    {
+      device_id: deviceId,
+      enabled: enabled ? 1 : 0,
+      default_reply_text: String(defaultReplyText || '').trim(),
+    },
   );
 }
 

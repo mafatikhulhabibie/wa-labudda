@@ -118,12 +118,23 @@ async function applySchemaPatches(conn) {
     CREATE TABLE IF NOT EXISTS device_auto_reply_settings (
       device_id BIGINT UNSIGNED NOT NULL,
       enabled TINYINT(1) NOT NULL DEFAULT 0,
+      default_reply_text TEXT NULL,
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (device_id),
       CONSTRAINT fk_auto_reply_settings_device FOREIGN KEY (device_id) REFERENCES devices (id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
   `);
+
+  try {
+    await conn.query(
+      'ALTER TABLE device_auto_reply_settings ADD COLUMN default_reply_text TEXT NULL AFTER enabled',
+    );
+    logger.info('schema patch: device_auto_reply_settings.default_reply_text');
+  } catch (e) {
+    const msg = String(e?.message || '');
+    if (e?.errno !== 1060 && !msg.includes('Duplicate column')) throw e;
+  }
 
   await conn.query(`
     CREATE TABLE IF NOT EXISTS device_auto_reply_rules (

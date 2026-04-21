@@ -187,6 +187,10 @@ Keterangan field Fonnte-like:
 - `filename`: nama file lampiran dokumen
 - `extension`: ekstensi file (atau turunan dari MIME type)
 
+Opsional, untuk format lebih mirip provider eksternal:
+
+- `WEBHOOK_NORMALIZE_SENDER_DIGITS=true` → field `sender` dan `member` akan dinormalisasi jadi digit-only (mis. `628123...`) tanpa suffix `@s.whatsapp.net`.
+
 Event yang tersedia:
 
 - `message.outgoing` — ketika API/dashboard mengirim pesan
@@ -311,10 +315,14 @@ Ambil status autoresponder device + daftar rules.
 Body:
 
 ```json
-{ "enabled": true }
+{
+  "enabled": true,
+  "default_reply_text": "Maaf, pesan Anda belum cocok keyword mana pun."
+}
 ```
 
 Menyalakan/mematikan autoresponder pada device tersebut.
+`default_reply_text` bersifat opsional, dipakai jika tidak ada rule yang match.
 
 ### `POST /api/autoresponder/:session_id/rules`
 
@@ -332,6 +340,9 @@ Body:
 ```
 
 `match_type`: `exact` | `contains` | `starts_with` | `regex`.
+
+Anda juga bisa isi `keyword` dengan banyak baris (1 baris = 1 keyword).
+Server akan otomatis membuat banyak rule dengan `reply_text` yang sama.
 
 ### `PATCH /api/autoresponder/:session_id/rules/:id`
 

@@ -64,6 +64,18 @@ function parseRuleInput(body = {}) {
 }
 
 /**
+ * Split multiline keywords (1 line = 1 keyword).
+ * @param {string} raw
+ */
+function splitKeywords(raw) {
+  const lines = String(raw || '')
+    .split(/\r?\n/)
+    .map((v) => v.trim())
+    .filter(Boolean);
+  return [...new Set(lines)];
+}
+
+/**
  * GET /api/autoresponder/:session_id
  */
 export async function getAutoReplyController(req, res) {
@@ -73,18 +85,28 @@ export async function getAutoReplyController(req, res) {
   return res.json({
     session_id: req.device.session_id,
     enabled: Boolean(cfg?.enabled),
+    default_reply_text: String(cfg?.default_reply_text || ''),
     rules,
   });
 }
 
 /**
  * PUT /api/autoresponder/:session_id
- * Body: { enabled: boolean }
+ * Body: { enabled: boolean, default_reply_text?: string }
  */
 export async function updateAutoReplyController(req, res) {
   const enabled = req.body?.enabled === true;
-  await upsertAutoReplySettings(Number(req.device.id), enabled);
-  return res.json({ success: true, session_id: req.device.session_id, enabled });
+  const defaultReplyText = String(req.body?.default_reply_text || '').trim();
+  if (defaultReplyText.length > 4000) {
+    return res.status(400).json({ error: 'default_reply_text max length is 4000' });
+  }
+  await upsertAutoReplySettings(Number(req.device.id), enabled, defaultReplyText);
+  return res.json({
+    success: true,
+    session_id: req.device.session_id,
+    enabled,
+    default_reply_text: defaultReplyText,
+  });
 }
 
 /**
@@ -92,9 +114,20 @@ export async function updateAutoReplyController(req, res) {
  */
 export async function createAutoReplyRuleController(req, res) {
   const input = parseRuleInput(req.body || {});
-  const id = await createAutoReplyRule(Number(req.device.id), input);
-  const created = await findAutoReplyRuleById(Number(req.device.id), id);
-  return res.status(201).json({ success: true, rule: created });
+  const keywords = splitKeywords(input.keyword);
+  if (keywords.length <= 1) {
+    const id = await createAutoReplyRule(Number(req.device.id), input);
+    const created = await findAutoReplyRuleById(Number(req.device.id), id);
+    return res.status(201).json({ success: true, rule: created });
+  }
+
+  const createdRules = [];
+  for (const keyword of keywords) {
+    const id = await createAutoReplyRule(Number(req.device.id), { ...input, keyword });
+    const created = await findAutoReplyRuleById(Number(req.device.id), id);
+    if (created) createdRules.push(created);
+  }
+  return res.status(201).json({ success: true, created_count: createdRules.length, rules: createdRules });
 }
 
 /**

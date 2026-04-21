@@ -85,9 +85,10 @@ export async function processIncomingAutoReply({ sessionId, payload, sendTextToJ
     if (nowTs - last < REPLY_COOLDOWN_MS) continue;
 
     const matched = rules.find((r) => isRuleMatch(text, r));
-    if (!matched) continue;
-
-    const replyText = String(matched.reply_text || '').trim();
+    const fallbackReply = String(cfg.default_reply_text || '').trim();
+    const replyText = matched
+      ? String(matched.reply_text || '').trim()
+      : fallbackReply;
     if (!replyText) continue;
 
     try {
@@ -96,11 +97,12 @@ export async function processIncomingAutoReply({ sessionId, payload, sendTextToJ
       await dispatchDeviceWebhook(sessionId, 'message.autoreply.sent', {
         trigger_message_id: item.message_id,
         chat_jid: item.chat_jid,
-        matched_rule_id: matched.id,
+        matched_rule_id: matched?.id || null,
+        used_default_reply: !matched,
       }).catch(() => {});
     } catch (err) {
       logger.warn(
-        { err, sessionId, chat_jid: item.chat_jid, rule_id: matched.id },
+        { err, sessionId, chat_jid: item.chat_jid, rule_id: matched?.id || null },
         'auto responder send failed',
       );
     }

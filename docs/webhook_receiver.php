@@ -2,275 +2,208 @@
 declare(strict_types=1);
 
 /**
- * Simple WA Gateway webhook receiver.
+ * Minimal webhook receiver for WA Gateway.
  *
- * Usage:
- * 1) Upload this file to your PHP server, example:
- *    https://appkamu.com/webhook_receiver.php
- * 2) Set webhook URL in WA Gateway to that URL.
- * 3) Change WEBHOOK_TOKEN below (secret internal script).
+ * - Accepts POST JSON
+ * - Extracts simple fields: device, sender, name, message, url, filename
+ * - Optional auto reply by keyword
+ * - Appends each event as JSON line to webhook-events.log
  */
 
-const WEBHOOK_TOKEN = 'habibi';
 const LOG_FILE = __DIR__ . '/webhook-events.log';
-const WA_GATEWAY_SEND_URL = 'https://api.fonnte.com/send';
-const WA_GATEWAY_API_KEY = ''; // Isi dengan token device Fonnte Anda.
+const AUTO_REPLY_ENABLED = true;
+const AUTO_REPLY_FALLBACK = 'Halo, pesan Anda sudah kami terima.';
+const WA_API_SEND_URL = 'http://127.0.0.1:3000/api/send';
+const WA_API_BEARER_TOKEN = '';
+const WA_API_USER_KEY = '';
 
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    http_response_code(200);
-    echo json_encode([
-        'ok' => true,
-        'message' => 'Webhook aktif',
-    ]);
+    echo json_encode(['ok' => true, 'message' => 'webhook receiver active']);
     exit;
 }
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode([
-        'ok' => false,
-        'error' => 'Method not allowed',
-    ]);
+    echo json_encode(['ok' => false, 'error' => 'method not allowed']);
     exit;
 }
 
-// Token disimpan di script saja.
-// Karena WA Gateway saat ini tidak mengirim custom header token,
-// token ini dipertahankan sebagai secret internal aplikasi Anda
-// (mis. dipakai untuk logic tambahan jika dibutuhkan).
-
-$rawBody = file_get_contents('php://input');
-if ($rawBody === false || trim($rawBody) === '') {
+$raw = file_get_contents('php://input');
+if ($raw === false || trim($raw) === '') {
     http_response_code(400);
-    echo json_encode([
-        'ok' => false,
-        'error' => 'Empty body',
-    ]);
+    echo json_encode(['ok' => false, 'error' => 'empty body']);
     exit;
 }
 
-$payload = json_decode($rawBody, true);
+$payload = json_decode($raw, true);
 if (!is_array($payload)) {
     http_response_code(400);
-    echo json_encode([
-        'ok' => false,
-        'error' => 'Invalid JSON',
-    ]);
+    echo json_encode(['ok' => false, 'error' => 'invalid json']);
     exit;
 }
 
-$event = isset($payload['event']) ? (string) $payload['event'] : 'unknown';
-$sessionId = isset($payload['session_id']) ? (string) $payload['session_id'] : 'unknown';
-$sentAt = isset($payload['sent_at']) ? (string) $payload['sent_at'] : gmdate('c');
-$data = $payload['data'] ?? null;
-$incomingMessage = null;
-$sender = null;
-$autoReply = null;
-$sendAttempted = false;
-$sendSuccess = null;
-$sendResponse = null;
-$notification = 'Webhook received';
-$replyBlockReason = null;
-$device = isset($payload['device']) ? (string) $payload['device'] : null;
+$event = asString($payload['event'] ?? null) ?? 'unknown';
+$sessionId = asString($payload['session_id'] ?? null) ?? 'unknown';
+$data = is_array($payload['data'] ?? null) ? $payload['data'] : [];
 
-// Format utama Fonnte: field di root payload.
-if (isset($payload['message']) && is_string($payload['message'])) {
-    $incomingMessage = $payload['message'];
-}
-if (isset($payload['sender']) && is_string($payload['sender'])) {
-    $sender = $payload['sender'];
-}
-if (isset($payload['device']) && is_string($payload['device']) && $sessionId === 'unknown') {
-    $sessionId = $payload['device'];
-}
-if ($event === 'unknown' && isset($payload['type']) && is_string($payload['type'])) {
-    $event = (string) $payload['type'];
-}
+$summary0 = (isset($data['summary'][0]) && is_array($data['summary'][0])) ? $data['summary'][0] : [];
+$message0 = (isset($data['messages'][0]) && is_array($data['messages'][0])) ? $data['messages'][0] : [];
 
-// Ambil teks pesan dari beberapa kemungkinan struktur payload.
-if (is_array($data)) {
-    if (isset($data['message']) && is_string($data['message'])) {
-        $incomingMessage = $data['message'];
-    } elseif (isset($data['text']) && is_string($data['text'])) {
-        $incomingMessage = $data['text'];
-    } elseif (isset($data['body']) && is_string($data['body'])) {
-        $incomingMessage = $data['body'];
-    }
+$device = asString($payload['device'] ?? null)
+    ?? asString($data['device'] ?? null)
+    ?? ($sessionId !== 'unknown' ? $sessionId : null);
 
-    // Ambil pengirim dari beberapa kemungkinan field payload.
-    if (isset($data['from']) && is_string($data['from'])) {
-        $sender = $data['from'];
-    } elseif (isset($data['sender']) && is_string($data['sender'])) {
-        $sender = $data['sender'];
-    } elseif (isset($data['phone']) && is_string($data['phone'])) {
-        $sender = $data['phone'];
-    } elseif (isset($data['number']) && is_string($data['number'])) {
-        $sender = $data['number'];
-    } elseif (isset($data['remote_jid']) && is_string($data['remote_jid'])) {
-        $sender = $data['remote_jid'];
-    } elseif (isset($data['chat_id']) && is_string($data['chat_id'])) {
-        $sender = $data['chat_id'];
-    }
+$sender = asString($payload['sender'] ?? null)
+    ?? asString($data['sender'] ?? null)
+    ?? asString($data['number'] ?? null)
+    ?? asString($summary0['chat_jid'] ?? null)
+    ?? asString($message0['participant'] ?? null)
+    ?? asString($message0['remoteJid'] ?? null);
 
-    // Format payload lain: data.messages[0]
-    if (isset($data['messages']) && is_array($data['messages']) && isset($data['messages'][0]) && is_array($data['messages'][0])) {
-        $firstMessage = $data['messages'][0];
+$name = asString($payload['name'] ?? null)
+    ?? asString($data['name'] ?? null)
+    ?? asString($message0['pushName'] ?? null)
+    ?? '';
 
-        if ($sender === null) {
-            if (isset($firstMessage['remoteJid']) && is_string($firstMessage['remoteJid'])) {
-                $sender = $firstMessage['remoteJid'];
-            } elseif (isset($firstMessage['remote_jid']) && is_string($firstMessage['remote_jid'])) {
-                $sender = $firstMessage['remote_jid'];
-            }
-        }
+$message = asString($payload['message'] ?? null)
+    ?? asString($data['message'] ?? null)
+    ?? asString($data['text'] ?? null)
+    ?? asString($summary0['text'] ?? null)
+    ?? asString($message0['text'] ?? null)
+    ?? '';
 
-        if ($incomingMessage === null && isset($firstMessage['message']) && is_array($firstMessage['message'])) {
-            $msg = $firstMessage['message'];
-            if (isset($msg['conversation']) && is_string($msg['conversation'])) {
-                $incomingMessage = $msg['conversation'];
-            } elseif (isset($msg['extendedTextMessage']['text']) && is_string($msg['extendedTextMessage']['text'])) {
-                $incomingMessage = $msg['extendedTextMessage']['text'];
-            } elseif (isset($msg['imageMessage']['caption']) && is_string($msg['imageMessage']['caption'])) {
-                $incomingMessage = $msg['imageMessage']['caption'];
-            }
-        }
-    }
-}
+$url = asString($payload['url'] ?? null)
+    ?? asString($data['url'] ?? null)
+    ?? asString($message0['url'] ?? null)
+    ?? '';
 
-// Contoh tanya jawab sederhana: "hai" => "halo".
-if ($incomingMessage !== null) {
-    $normalized = strtolower(trim($incomingMessage));
-    if ($normalized === 'hai') {
-        $autoReply = 'halo';
-    }
-}
+$filename = asString($payload['filename'] ?? null)
+    ?? asString($data['filename'] ?? null)
+    ?? asString($message0['filename'] ?? null)
+    ?? '';
 
-// Jika ada auto-reply, kirim ke endpoint WA Gateway.
-if ($autoReply !== null) {
-    if (WA_GATEWAY_SEND_URL === '') {
-        $replyBlockReason = 'WA_GATEWAY_SEND_URL kosong';
-    } elseif ($sender === null || trim($sender) === '') {
-        $replyBlockReason = 'Nomor tujuan tidak ditemukan di payload';
-    }
-
-    $sendAttempted = true;
-    $sendResult = sendWaMessage($sessionId, $sender, $autoReply);
-    $sendSuccess = $sendResult['ok'];
-    $sendResponse = $sendResult;
-}
-
-// Event test dari WA Gateway: tampilkan notifikasi sukses yang jelas.
-if (stripos($event, 'test') !== false) {
-    $notification = 'Webhook test berhasil';
-} elseif ($incomingMessage === null && $event === 'message.incoming') {
-    $notification = 'Webhook masuk, tapi payload tidak memuat isi pesan';
-    if ($replyBlockReason === null) {
-        $replyBlockReason = 'Tidak bisa cocokkan keyword "hai" karena teks tidak ada';
-    }
-} elseif ($incomingMessage === null && isset($payload['message']) === false) {
-    $notification = 'Webhook masuk, tapi pesan tidak ditemukan di payload';
-    if ($replyBlockReason === null) {
-        $replyBlockReason = 'Field message tidak ada pada payload Fonnte';
-    }
-}
-
-$line = json_encode([
+$log = [
     'received_at' => gmdate('c'),
     'event' => $event,
     'session_id' => $sessionId,
-    'sent_at' => $sentAt,
     'device' => $device,
     'sender' => $sender,
-    'incoming_message' => $incomingMessage,
-    'auto_reply' => $autoReply,
-    'send_attempted' => $sendAttempted,
-    'send_success' => $sendSuccess,
-    'send_response' => $sendResponse,
-    'reply_block_reason' => $replyBlockReason,
-    'notification' => $notification,
-    'data' => $data,
-], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    'name' => $name,
+    'message' => $message,
+    'url' => $url,
+    'filename' => $filename,
+    'auto_reply' => null,
+    'auto_reply_result' => null,
+    'raw' => $payload,
+];
 
+if (AUTO_REPLY_ENABLED && $event === 'message.incoming' && $sender !== null && $sender !== '') {
+    $replyText = matchAutoReply($message);
+    $send = sendAutoReply($device, $sender, $replyText);
+    $log['auto_reply'] = $replyText;
+    $log['auto_reply_result'] = $send;
+}
+
+$line = json_encode($log, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 if ($line !== false) {
     @file_put_contents(LOG_FILE, $line . PHP_EOL, FILE_APPEND | LOCK_EX);
 }
 
-http_response_code(200);
 echo json_encode([
     'ok' => true,
-    'message' => $notification,
     'event' => $event,
-    'session_id' => $sessionId,
     'device' => $device,
     'sender' => $sender,
-    'incoming_message' => $incomingMessage,
-    'auto_reply' => $autoReply,
-    'send_attempted' => $sendAttempted,
-    'send_success' => $sendSuccess,
-    'send_response' => $sendResponse,
-    'reply_block_reason' => $replyBlockReason,
-    'notification' => $notification,
+    'name' => $name,
+    'message' => $message,
+    'url' => $url,
+    'filename' => $filename,
 ]);
 
-/**
- * Kirim pesan ke WA Gateway.
- *
- * Catatan: isi WA_GATEWAY_SEND_URL sesuai endpoint kirim pesan provider Anda.
- */
-function sendWaMessage(string $sessionId, ?string $to, string $message): array
+function asString(mixed $value): ?string
 {
-    if (WA_GATEWAY_SEND_URL === '') {
-        return [
-            'ok' => false,
-            'error' => 'WA_GATEWAY_SEND_URL belum diisi',
-        ];
+    if (!is_string($value)) {
+        return null;
+    }
+    $v = trim($value);
+    return $v === '' ? null : $v;
+}
+
+function matchAutoReply(string $message): string
+{
+    $text = strtolower(trim($message));
+    if ($text === '') {
+        return AUTO_REPLY_FALLBACK;
+    }
+    if (str_contains($text, 'harga')) {
+        return 'Untuk info harga, silakan kirim nama produk yang ingin ditanyakan.';
+    }
+    if (str_contains($text, 'jam buka') || str_contains($text, 'open')) {
+        return 'Jam operasional kami: Senin - Sabtu, 09:00 - 17:00.';
+    }
+    if ($text === 'hai' || $text === 'halo') {
+        return 'Halo, ada yang bisa kami bantu?';
+    }
+    return AUTO_REPLY_FALLBACK;
+}
+
+function sendAutoReply(?string $sessionId, string $number, string $replyText): array
+{
+    if (WA_API_SEND_URL === '') {
+        return ['ok' => false, 'error' => 'WA_API_SEND_URL kosong'];
+    }
+    if ($sessionId === null || $sessionId === '') {
+        return ['ok' => false, 'error' => 'device/session_id tidak ditemukan'];
     }
 
-    if ($to === null || trim($to) === '') {
-        return [
-            'ok' => false,
-            'error' => 'Nomor tujuan/pengirim tidak ditemukan di payload',
-        ];
+    $body = json_encode([
+        'session_id' => $sessionId,
+        'number' => normalizeNumber($number),
+        'message' => $replyText,
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+    if ($body === false) {
+        return ['ok' => false, 'error' => 'gagal encode json'];
     }
 
-    $body = [
-        // Fonnte expects form-data with target/message.
-        'target' => $to,
-        'message' => $message,
+    $headers = [
+        'Content-Type: application/json',
+        'Accept: application/json',
     ];
-    if ($sessionId !== 'unknown' && trim($sessionId) !== '') {
-        $body['device'] = $sessionId;
+    if (WA_API_BEARER_TOKEN !== '') {
+        $headers[] = 'Authorization: Bearer ' . WA_API_BEARER_TOKEN;
+    }
+    if (WA_API_USER_KEY !== '') {
+        $headers[] = 'x-api-key: ' . WA_API_USER_KEY;
     }
 
-    $headers = ['Accept: application/json'];
-    if (WA_GATEWAY_API_KEY !== '') {
-        $headers[] = 'Authorization: ' . WA_GATEWAY_API_KEY;
-    }
-
-    $ch = curl_init(WA_GATEWAY_SEND_URL);
+    $ch = curl_init(WA_API_SEND_URL);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 20);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
-
-    $result = curl_exec($ch);
-    if ($result === false) {
-        $error = curl_error($ch);
+    $raw = curl_exec($ch);
+    if ($raw === false) {
+        $err = curl_error($ch);
         curl_close($ch);
-        return [
-            'ok' => false,
-            'error' => 'cURL error: ' . $error,
-        ];
+        return ['ok' => false, 'error' => 'curl: ' . $err];
     }
-
-    $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     return [
-        'ok' => $httpCode >= 200 && $httpCode < 300,
-        'http_code' => $httpCode,
-        'raw_response' => $result,
+        'ok' => $code >= 200 && $code < 300,
+        'http_code' => $code,
+        'raw' => $raw,
     ];
+}
+
+function normalizeNumber(string $sender): string
+{
+    $left = explode(':', $sender)[0] ?? '';
+    $jid = explode('@', $left)[0] ?? '';
+    return preg_replace('/\D+/', '', $jid) ?? '';
 }
