@@ -203,6 +203,7 @@ class ManagedSession {
           logger.warn({ err, sessionId: this.sessionId }, 'incoming webhook handler failed');
         }
       }
+      const summary = summarizeMessagesUpsert(this.sessionId, payload);
       await dispatchDeviceWebhook(this.sessionId, 'message.incoming', {
         type: payload.type,
         messages: payload.messages?.map((m) => ({
@@ -211,6 +212,7 @@ class ManagedSession {
           fromMe: m.key?.fromMe,
           messageTimestamp: m.messageTimestamp,
         })),
+        summary,
       }).catch(() => {});
       try {
         await processIncomingAutoReply({

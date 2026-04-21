@@ -11,6 +11,11 @@ function boolEnv(name, fallback = false) {
   return ['1', 'true', 'yes', 'on'].includes(String(v).toLowerCase());
 }
 
+function enumEnv(name, allowed, fallback) {
+  const raw = String(process.env[name] || '').trim().toLowerCase();
+  return allowed.includes(raw) ? raw : fallback;
+}
+
 export function getConfig() {
   const sendDelayMinMs = intEnv('SEND_DELAY_MIN_MS', 3000);
   const sendDelayMaxMs = intEnv('SEND_DELAY_MAX_MS', 10_000);
@@ -39,6 +44,8 @@ export function getConfig() {
     rateLimitWindowMs: intEnv('RATE_LIMIT_WINDOW_MS', 60_000),
     /** Optional: POST JSON for each incoming message (messages.upsert) */
     webhookIncomingMessageUrl: process.env.WEBHOOK_INCOMING_MESSAGE_URL?.trim() || '',
+    /** Device webhook payload format: default | fonnte */
+    webhookPayloadMode: enumEnv('WEBHOOK_PAYLOAD_MODE', ['default', 'fonnte'], 'default'),
     /** Queue backend label for ops / future BullMQ wiring */
     queueDriver: process.env.QUEUE_DRIVER || 'memory',
 

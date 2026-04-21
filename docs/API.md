@@ -161,6 +161,22 @@ Setiap event dikirim via `POST` JSON ke URL webhook:
 }
 ```
 
+Jika env `WEBHOOK_PAYLOAD_MODE=fonnte`, payload tetap memuat field di atas, dan ditambah field root ala Fonnte:
+
+```json
+{
+  "device": "sales-01",
+  "sender": "6281234567890@s.whatsapp.net",
+  "message": "hai",
+  "member": null,
+  "name": "",
+  "location": "",
+  "url": "",
+  "filename": "",
+  "extension": ""
+}
+```
+
 Event yang tersedia:
 
 - `message.outgoing` — ketika API/dashboard mengirim pesan
