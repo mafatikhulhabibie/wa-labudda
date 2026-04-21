@@ -1,6 +1,11 @@
 import { Router } from 'express';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { authenticate, requireAdmin } from '../middlewares/auth.js';
+import {
+  authenticate,
+  authorizeAuthenticatedActor,
+  requireAdmin,
+  requireUserAuth,
+} from '../middlewares/auth.js';
 import { requireDeviceAccess } from '../middlewares/requireDeviceAccess.js';
 import {
   loginController,
@@ -65,7 +70,7 @@ router.get('/auth/me', authenticate, asyncHandler(meController));
 router.patch('/auth/profile', authenticate, asyncHandler(updateProfileController));
 router.patch('/auth/password', authenticate, asyncHandler(updatePasswordController));
 
-router.use(authenticate);
+router.use(authenticate, authorizeAuthenticatedActor);
 
 router.get('/docs', asyncHandler(docsController));
 
@@ -80,7 +85,7 @@ router.get('/session/qr/:session_id', requireDeviceAccess, asyncHandler(getSessi
 router.get('/session/status/:session_id', requireDeviceAccess, asyncHandler(getSessionStatusController));
 router.delete('/session/:session_id', requireDeviceAccess, asyncHandler(deleteDeviceController));
 
-router.post('/send', sendUploadMaybe, requireDeviceAccess, asyncHandler(sendController));
+router.post('/send', sendUploadMaybe, requireUserAuth, requireDeviceAccess, asyncHandler(sendController));
 
 router.get('/contact-groups', asyncHandler(listContactGroupsController));
 router.post('/contact-groups', asyncHandler(createContactGroupController));

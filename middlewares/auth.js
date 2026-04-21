@@ -75,6 +75,31 @@ export async function authenticate(req, res, next) {
 }
 
 /** @type {import('express').RequestHandler} */
+export function authorizeAuthenticatedActor(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  if (req.user.role !== 'admin' && req.user.role !== 'member') {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  return next();
+}
+
+/** @type {import('express').RequestHandler} */
+export function requireUserAuth(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  if (req.user.authVia === 'device_api_key') {
+    return res.status(403).json({
+      error: 'User authentication required',
+      message: 'Endpoint ini wajib menggunakan sesi user (JWT/cookie atau user API key)',
+    });
+  }
+  return next();
+}
+
+/** @type {import('express').RequestHandler} */
 export function requireAdmin(req, res, next) {
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Admin only' });

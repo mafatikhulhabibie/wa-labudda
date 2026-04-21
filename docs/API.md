@@ -1,12 +1,18 @@
 # WA Gateway — HTTP API
 
-Semua endpoint di bawah `/api` (kecuali disebut lain) memerlukan autentikasi:
+Semua endpoint di bawah `/api` (kecuali disebut lain) memakai 2 lapis keamanan:
+
+1. **Autentikasi** (identitas caller),
+2. **Otorisasi** (validasi hak akses role/scope resource).
+
+Autentikasi dapat memakai:
 
 - **Cookie sesi** `wg_session` (setelah login lewat dashboard), atau
 - **Header** `Authorization: Bearer <jwt>`, atau
 - **Header** `x-api-key: <device api key>` (kunci per-device; scope ke satu `session_id`).
 
 Tanpa kredensial valid → **401** `{ "error": "Unauthorized" }`.
+Jika role/scope tidak memenuhi → **403** `{ "error": "Forbidden" }`.
 
 ---
 
@@ -183,7 +189,12 @@ Contoh URL endpoint penerima (bebas milik Anda):
 }
 ```
 
-Jika request memakai `x-api-key` device, `session_id` boleh dihilangkan. Server otomatis memakai `session_id` yang terikat ke API key tersebut.
+Endpoint kirim pesan sekarang **wajib user-level auth**:
+
+- boleh: cookie sesi user / Bearer JWT user / user API key,
+- tidak boleh: `x-api-key` device.
+
+Jika memakai `x-api-key` device pada endpoint ini, respons **403**.
 
 **Gambar atau dokumen (multipart)** — `Content-Type: multipart/form-data`
 
