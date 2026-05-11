@@ -150,7 +150,29 @@ Kirim test payload ke URL webhook aktif.
 
 ### Event payload format
 
-Setiap event dikirim via `POST` JSON ke URL webhook:
+Setiap event dikirim via `POST` JSON ke URL webhook.
+
+**Bawaan (tanpa env):** format **fonnte** — satu objek berisi `event`, `session_id`, `sent_at`, `data` (detail wa-server), dan field root yang bisa langsung dibaca ala Fonnte / PHP (`device`, `sender`, `message`, `member`, `name`, `location`, `url`, `filename`, `extension`; yang kosong berupa string `""`).
+
+```json
+{
+  "event": "message.incoming",
+  "session_id": "sales-01",
+  "sent_at": "2026-04-19T10:20:30.000Z",
+  "data": {},
+  "device": "sales-01",
+  "sender": "6281234567890@s.whatsapp.net",
+  "message": "hai",
+  "member": "",
+  "name": "Nama Pengirim",
+  "location": "",
+  "url": "",
+  "filename": "",
+  "extension": ""
+}
+```
+
+**Hanya** jika env `WEBHOOK_PAYLOAD_MODE=default`, body dibatasi ke bentuk nested berikut (tanpa field root `device` / `sender` / dll.):
 
 ```json
 {
@@ -158,22 +180,6 @@ Setiap event dikirim via `POST` JSON ke URL webhook:
   "session_id": "sales-01",
   "sent_at": "2026-04-19T10:20:30.000Z",
   "data": {}
-}
-```
-
-Jika env `WEBHOOK_PAYLOAD_MODE=fonnte`, payload tetap memuat field di atas, dan ditambah field root ala Fonnte (siap plug-and-play):
-
-```json
-{
-  "device": "sales-01",
-  "sender": "6281234567890@s.whatsapp.net",
-  "message": "hai",
-  "member": null,
-  "name": "Nama Pengirim",
-  "location": "",
-  "url": "https://...",
-  "filename": "brosur.pdf",
-  "extension": "pdf"
 }
 ```
 
@@ -195,6 +201,8 @@ Event yang tersedia:
 
 - `message.outgoing` — ketika API/dashboard mengirim pesan
 - `message.incoming` — ketika ada pesan masuk (ringkas dari `messages.upsert`)
+
+Pada `message.incoming`, field `data.primary` berisi pesan masuk pertama yang **bukan** `fromMe` (JID chat, teks, `participant` untuk grup). Ini lebih stabil untuk integrasi webhook daripada mengandalkan `data.messages[0]` saja.
 - `message.autoreply.sent` — ketika autoresponder mengirim balasan otomatis
 - `webhook.test` — event uji koneksi
 

@@ -2,6 +2,144 @@ import { withSpinner } from './spinner.js';
 
 const $ = (id) => document.getElementById(id);
 
+const THEME_KEY = 'wg-theme';
+const SIDEBAR_EXPANDED_KEY = 'wg-sidebar-expanded';
+
+function applyDashboardTheme(dark) {
+  const r = document.documentElement;
+  if (dark) {
+    r.classList.remove('light');
+    r.classList.add('dark');
+    r.style.colorScheme = 'dark';
+  } else {
+    r.classList.remove('dark');
+    r.classList.add('light');
+    r.style.colorScheme = 'light';
+  }
+  try {
+    localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
+  } catch (_) {}
+}
+
+function initDashboardThemeToggle() {
+  $('btnThemeToggle')?.addEventListener('click', () => {
+    applyDashboardTheme(!document.documentElement.classList.contains('dark'));
+  });
+}
+
+function applySidebarExpanded(expanded) {
+  document.body.classList.toggle('wg-sidebar-expanded', expanded);
+  try {
+    if (expanded) localStorage.setItem(SIDEBAR_EXPANDED_KEY, '1');
+    else localStorage.removeItem(SIDEBAR_EXPANDED_KEY);
+  } catch (_) {}
+  syncSidebarToggleUi();
+}
+
+function syncSidebarToggleUi() {
+  const btn = $('btnSidebarToggle');
+  if (!btn) return;
+  const exp = document.body.classList.contains('wg-sidebar-expanded');
+  btn.setAttribute('aria-expanded', exp ? 'true' : 'false');
+  btn.title = exp
+    ? 'Ciutkan menu (hanya ikon)'
+    : 'Bentangkan menu (tampilkan judul menu)';
+  btn.setAttribute(
+    'aria-label',
+    exp ? 'Ciutkan sidebar (sembunyikan judul menu)' : 'Bentangkan sidebar (tampilkan judul menu)',
+  );
+}
+
+function userInitials(user) {
+  const fn = String(user.full_name || '').trim();
+  if (fn) {
+    const parts = fn.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase().slice(0, 2);
+    }
+    return fn.slice(0, 2).toUpperCase();
+  }
+  const em = String(user.email || '').trim();
+  if (em) return em.slice(0, 2).toUpperCase();
+  return '?';
+}
+
+function applyTopbarUserIdentity(user) {
+  const nameEl = $('topbarUserName');
+  const avatarEl = $('topbarUserAvatar');
+  const menuNameEl = $('userMenuPanelName');
+  const menuEmailEl = $('userMenuPanelEmail');
+  if (!user) return;
+  const fn = String(user.full_name || '').trim();
+  const em = String(user.email || '').trim();
+  const displayName = fn || em || '—';
+  if (nameEl) nameEl.textContent = displayName;
+  if (menuNameEl) menuNameEl.textContent = displayName;
+  if (menuEmailEl) {
+    menuEmailEl.textContent = em;
+    menuEmailEl.hidden = !em;
+  }
+  if (avatarEl) avatarEl.textContent = userInitials(user);
+}
+
+function initSidebarToggle() {
+  $('btnSidebarToggle')?.addEventListener('click', () => {
+    applySidebarExpanded(!document.body.classList.contains('wg-sidebar-expanded'));
+  });
+  syncSidebarToggleUi();
+}
+
+function initUserMenu() {
+  const btn = $('btnUserMenu');
+  const panel = $('userMenuPanel');
+  const wrap = $('userMenuWrap');
+  if (!btn || !panel || !wrap) return;
+
+  const chev = document.querySelector('.topbar-user-chevron');
+
+  function closeMenu() {
+    panel.classList.add('hidden');
+    btn.setAttribute('aria-expanded', 'false');
+    chev?.classList.remove('rotate-180');
+  }
+
+  function openMenu() {
+    panel.classList.remove('hidden');
+    btn.setAttribute('aria-expanded', 'true');
+    chev?.classList.add('rotate-180');
+  }
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (panel.classList.contains('hidden')) openMenu();
+    else closeMenu();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (e.target instanceof Node && wrap.contains(e.target)) return;
+    closeMenu();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
+  });
+
+  $('userMenuGoProfile')?.addEventListener('click', () => {
+    closeMenu();
+    void (async () => {
+      closeAddDevicePanel({ skipUrl: true });
+      await showTab('profile');
+      setDashboardHashFromState('profile', false);
+    })();
+  });
+}
+
+function initTopbarNotifications() {
+  $('btnTopbarNotifications')?.addEventListener('click', () => {
+    toast('Fitur notifikasi belum diaktifkan.', 'ok');
+  });
+}
+
 function iconSvg(kind) {
   const base = 'width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
   if (kind === 'send') return `<svg ${base}><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>`;
@@ -17,21 +155,33 @@ function iconSvg(kind) {
   if (kind === 'device') return `<svg ${base}><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 18h.01"/></svg>`;
   if (kind === 'contacts') return `<svg ${base}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`;
   if (kind === 'profile') return `<svg ${base}><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>`;
+  if (kind === 'close') return `<svg ${base}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
+  if (kind === 'qr') return `<svg ${base}><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M16 16h.01"/><path d="M21 12v.01"/></svg>`;
+  if (kind === 'webhook') return `<svg ${base}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+  if (kind === 'pause') return `<svg ${base}><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+  if (kind === 'check') return `<svg ${base}><path d="M20 6 9 17l-5-5"/></svg>`;
+  if (kind === 'menu') return `<svg ${base}><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`;
+  if (kind === 'more') return `<svg ${base}><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>`;
   return `<svg ${base}><circle cx="12" cy="12" r="9"/></svg>`;
 }
 
 function inferIconKind(text) {
   const t = text.toLowerCase();
+  if (t.includes('tutup') || t.includes('batal')) return 'close';
+  if (t.includes('ya,') || t === 'ya' || t.includes('lanjutkan')) return 'check';
+  if (t.includes('qr')) return 'qr';
+  if (t.includes('webhook')) return 'webhook';
+  if (t.includes('stopped') || t.includes('stop')) return 'pause';
   if (t.includes('kirim') || t.includes('send') || t.includes('hubungkan')) return 'send';
   if (t.includes('tambah') || t.includes('buat') || t.includes('generate') || t.includes('baru')) return 'add';
   if (t.includes('edit') || t.includes('simpan') || t.includes('ubah')) return 'edit';
   if (t.includes('hapus') || t.includes('delete')) return 'delete';
-  if (t.includes('reload') || t.includes('muat')) return 'reload';
+  if (t.includes('reload') || t.includes('muat ulang')) return 'reload';
   if (t.includes('keluar') || t.includes('logout')) return 'logout';
   if (t.includes('chat')) return 'chat';
   if (t.includes('api') || t.includes('/health') || t.includes('dokumen')) return 'api';
   if (t.includes('device')) return 'device';
-  if (t.includes('kontak')) return 'contacts';
+  if (t.includes('grup') || t.includes('group')) return 'contacts';
   if (t.includes('profil')) return 'profile';
   if (t.includes('user') || t.includes('pengguna')) return 'user';
   if (t.includes('docs') || t.includes('dokumentasi')) return 'docs';
@@ -39,19 +189,41 @@ function inferIconKind(text) {
 }
 
 function decorateIcons(root = document) {
-  const nodes = root.querySelectorAll('button, .nav-tab, header a');
+  const nodes = root.querySelectorAll(
+    'aside .nav-tab, aside [data-menu-tab], aside a[href="/wa.html"], main button[type="button"], #confirmModal button[type="button"]',
+  );
   nodes.forEach((el) => {
     if (!(el instanceof HTMLElement)) return;
     if (el.dataset.iconized === '1') return;
-    const label = (el.textContent || '').trim();
+    if (el.closest('.select2-container')) return;
+    if (el.getAttribute('aria-haspopup') === 'listbox') return;
+    const label =
+      el.querySelector('.sidebar-nav-text, .action-btn-text')?.textContent?.trim() ||
+      (el.textContent || '').trim();
     if (!label) return;
     const kind = inferIconKind(label);
     const icon = document.createElement('span');
     icon.setAttribute('aria-hidden', 'true');
-    icon.className = 'inline-flex h-4 w-4 shrink-0 items-center justify-center opacity-90';
-    icon.innerHTML = iconSvg(kind);
-    el.classList.add('inline-flex', 'items-center', 'gap-2');
-    el.prepend(icon);
+    const inSidebar =
+      el.closest('aside') &&
+      (el.classList.contains('nav-tab') ||
+        el.hasAttribute('data-menu-tab') ||
+        el.getAttribute('href') === '/wa.html');
+    icon.className = inSidebar
+      ? 'sidebar-action-icon inline-flex h-5 w-5 shrink-0 items-center justify-center opacity-90'
+      : 'action-btn-icon inline-flex h-4 w-4 shrink-0 items-center justify-center opacity-90';
+    icon.innerHTML = iconSvg(kind).replace(/width="14" height="14"/, `width="${inSidebar ? '20' : '14'}" height="${inSidebar ? '20' : '14'}"`);
+    if (inSidebar) {
+      if (!el.classList.contains('sidebar-nav-item')) el.classList.add('sidebar-nav-item');
+    } else {
+      el.classList.add('inline-flex', 'items-center', 'gap-2');
+    }
+    const textWrap = el.querySelector('.sidebar-nav-text, .action-btn-text');
+    if (textWrap) {
+      el.insertBefore(icon, textWrap);
+    } else {
+      el.prepend(icon);
+    }
     el.dataset.iconized = '1';
   });
 }
@@ -298,7 +470,7 @@ async function openWebhookForSession(sessionId) {
 function toast(text, type = 'info') {
   const el = document.createElement('div');
   const base =
-    'pointer-events-auto cursor-pointer rounded-xl border px-4 py-3.5 text-sm shadow-wg backdrop-blur-md animate-toast-in border-white/12 bg-[rgba(22,30,42,0.95)]';
+    'pointer-events-auto cursor-pointer rounded-xl border px-4 py-3.5 text-sm backdrop-blur-md animate-toast-in border-slate-200 bg-white/95 text-wg-text shadow-[0_8px_30px_rgb(15_23_42/0.12)] dark:border-white/12 dark:bg-[rgba(22,30,42,0.95)] dark:shadow-wg';
   const err = type === 'error' ? ' border-red-400/40' : '';
   const ok = type === 'ok' ? ' border-emerald-400/40' : '';
   el.className = base + err + ok;
@@ -477,12 +649,25 @@ async function showTab(name, tabBtn) {
   initAllSelect2IfNeeded();
   closeSendSelect2Dropdowns();
 
+  const navOn =
+    'nav-tab wg-nav-active sidebar-nav-item rounded-lg border-0 border-l-[3px] border-wg-accent px-3 py-2.5 text-left text-sm font-medium text-wg-accent transition-colors cursor-pointer';
+  const navOff =
+    'nav-tab sidebar-nav-item rounded-lg border-0 border-l-[3px] border-transparent px-3 py-2.5 text-left text-sm font-medium text-wg-muted transition-colors hover:bg-slate-200 dark:hover:bg-white/[0.06] hover:text-wg-text cursor-pointer';
   document.querySelectorAll('.nav-tab').forEach((b) => {
     const on = b.dataset.tab === name;
-    b.className =
-      'nav-tab rounded-lg border-0 px-3.5 py-2 text-sm font-semibold transition-colors cursor-pointer ' +
-      (on ? 'bg-white/[0.07] text-wg-text' : 'bg-transparent text-wg-muted hover:text-wg-text');
+    b.className = on ? navOn : navOff;
   });
+
+  const menuOn =
+    'menu-side-tab wg-nav-active sidebar-nav-item rounded-lg border-0 border-l-[3px] border-wg-accent px-3 py-2.5 text-left text-sm font-medium text-wg-accent transition-colors cursor-pointer';
+  const menuOff =
+    'menu-side-tab sidebar-nav-item rounded-lg border-0 border-l-[3px] border-transparent px-3 py-2.5 text-left text-sm font-medium text-wg-muted transition-colors hover:bg-slate-200 dark:hover:bg-white/[0.06] hover:text-wg-text cursor-pointer';
+  document.querySelectorAll('button[data-menu-tab]').forEach((b) => {
+    const tab = b.getAttribute('data-menu-tab');
+    const on = tab === name;
+    b.className = on ? menuOn : menuOff;
+  });
+
   animateTabPanels(name);
   stopQrPoll();
 
@@ -503,7 +688,7 @@ async function showTab(name, tabBtn) {
   }
 
   if (name === 'docs') {
-    const btn = tabBtn || document.querySelector('.nav-tab[data-tab="docs"]');
+    const btn = tabBtn || document.querySelector('button[data-menu-tab="docs"]');
     await withSpinner(btn, async () => {
       try {
         await loadDocs();
@@ -612,24 +797,24 @@ async function loadDevices() {
         ? 'inline-block rounded-md px-2 py-0.5 text-[0.72rem] font-semibold uppercase text-emerald-300 bg-emerald-500/10'
         : st === 'connecting'
           ? 'inline-block rounded-md px-2 py-0.5 text-[0.72rem] font-semibold uppercase text-amber-400 bg-amber-400/10'
-          : 'inline-block rounded-md px-2 py-0.5 text-[0.72rem] font-semibold uppercase text-wg-muted bg-white/[0.06]';
+          : 'inline-block rounded-md px-2 py-0.5 text-[0.72rem] font-semibold uppercase text-wg-muted bg-slate-200 dark:bg-white/[0.06]';
     tr.innerHTML = `
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left"><code class="font-mono text-[0.85em]">${escapeHtml(d.session_id)}</code></td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left">
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left"><code class="font-mono text-[0.85em]">${escapeHtml(d.session_id)}</code></td>
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left">
         <div class="font-medium">${escapeHtml(d.label || '—')}</div>
         <div class="mt-0.5 text-[0.78rem] text-wg-muted">${escapeHtml(formatDeviceIdentity(d))}</div>
       </td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left"><span class="${pillCls}">${escapeHtml(d.status)}</span></td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5">
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left"><span class="${pillCls}">${escapeHtml(d.status)}</span></td>
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5">
         <div class="flex flex-wrap gap-1.5 whitespace-nowrap">
-        <button type="button" class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:opacity-45" data-act="${primaryAct}" data-sid="${escapeHtml(d.session_id)}">${primaryLabel}</button>
+        <button type="button" class="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.035] px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-slate-300 dark:hover:border-white/[0.10] hover:bg-slate-200/90 dark:hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:opacity-45" data-act="${primaryAct}" data-sid="${escapeHtml(d.session_id)}">${primaryLabel}</button>
         ${
           connected
             ? ''
-            : `<button type="button" class="rounded-xl border border-dashed border-white/20 bg-transparent px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text" data-act="qr" data-sid="${escapeHtml(d.session_id)}">QR</button>`
+            : `<button type="button" class="rounded-xl border border-dashed border-slate-300 dark:border-white/20 bg-transparent px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text" data-act="qr" data-sid="${escapeHtml(d.session_id)}">QR</button>`
         }
         <button type="button" class="rounded-xl border border-red-400/35 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-400 transition hover:bg-red-500/20 active:scale-[0.98] disabled:opacity-45" data-act="del" data-sid="${escapeHtml(d.session_id)}">Hapus</button>
-        <button type="button" class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:opacity-45" data-act="webhook" data-sid="${escapeHtml(d.session_id)}">Webhook</button>
+        <button type="button" class="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.035] px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-slate-300 dark:hover:border-white/[0.10] hover:bg-slate-200/90 dark:hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:opacity-45" data-act="webhook" data-sid="${escapeHtml(d.session_id)}">Webhook</button>
         </div>
       </td>`;
     tbody.appendChild(tr);
@@ -737,7 +922,7 @@ function switchContactsSubtab(tab) {
     const on = btn.getAttribute('data-contact-subtab') === tab;
     btn.className =
       'rounded-lg border-0 px-3.5 py-2 text-sm font-semibold transition-colors ' +
-      (on ? 'bg-white/[0.07] text-wg-text' : 'bg-transparent text-wg-muted hover:text-wg-text');
+      (on ? 'bg-slate-200/90 dark:bg-white/[0.07] text-wg-text' : 'bg-transparent text-wg-muted hover:text-wg-text');
   });
 }
 
@@ -874,12 +1059,12 @@ function renderContactsTable() {
   for (const c of rows) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left">${escapeHtml(c.display_name)}</td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left"><code class="font-mono text-[0.85em]">${escapeHtml(c.phone)}</code></td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left">${escapeHtml(c.group_name || '—')}</td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5">
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left">${escapeHtml(c.display_name)}</td>
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left"><code class="font-mono text-[0.85em]">${escapeHtml(c.phone)}</code></td>
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left">${escapeHtml(c.group_name || '—')}</td>
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5">
         <div class="flex flex-wrap gap-1.5 whitespace-nowrap">
-        <button type="button" class="rounded-xl border border-dashed border-white/20 bg-transparent px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text" data-edit-contact="${c.id}">Edit</button>
+        <button type="button" class="rounded-xl border border-dashed border-slate-300 dark:border-white/20 bg-transparent px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text" data-edit-contact="${c.id}">Edit</button>
         <button type="button" class="rounded-xl border border-red-400/35 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-400 transition hover:bg-red-500/20" data-del-contact="${c.id}">Hapus</button>
         </div>
       </td>`;
@@ -965,11 +1150,11 @@ function renderModalGroupsTable() {
     const tr = document.createElement('tr');
     if (g.id === modalGroupEditingId) {
       const tdName = document.createElement('td');
-      tdName.className = 'border-b border-white/[0.08] px-3 py-2.5 text-left';
+      tdName.className = 'border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left';
       const inp = document.createElement('input');
       inp.type = 'text';
       inp.className =
-        'box-border w-full max-w-full rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-sm text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10';
+        'box-border w-full max-w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-sm text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10';
       inp.maxLength = 100;
       inp.value = g.name;
       inp.autocomplete = 'off';
@@ -977,18 +1162,18 @@ function renderModalGroupsTable() {
       tdName.appendChild(inp);
 
       const tdAct = document.createElement('td');
-      tdAct.className = 'border-b border-white/[0.08] px-3 py-2.5';
+      tdAct.className = 'border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5';
       const wrap = document.createElement('div');
       wrap.className = 'flex flex-wrap gap-1.5 whitespace-nowrap';
       const btnSave = document.createElement('button');
       btnSave.type = 'button';
       btnSave.className =
-        'rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-3 py-2 text-xs font-semibold text-[#041208] transition hover:brightness-110';
+        'rounded-xl border-0 wg-primary-fill px-3 py-2 text-xs font-semibold text-white transition hover:brightness-110';
       btnSave.textContent = 'Simpan';
       const btnCancel = document.createElement('button');
       btnCancel.type = 'button';
       btnCancel.className =
-        'rounded-xl border border-dashed border-white/20 bg-transparent px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text';
+        'rounded-xl border border-dashed border-slate-300 dark:border-white/20 bg-transparent px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text';
       btnCancel.textContent = 'Batal';
 
       const save = () => {
@@ -1033,10 +1218,10 @@ function renderModalGroupsTable() {
       tr.append(tdName, tdAct);
     } else {
       tr.innerHTML = `
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left">${escapeHtml(g.name)}</td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5">
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left">${escapeHtml(g.name)}</td>
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5">
         <div class="flex flex-wrap gap-1.5 whitespace-nowrap">
-        <button type="button" class="rounded-xl border border-dashed border-white/20 bg-transparent px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text" data-edit-group="${g.id}">Edit</button>
+        <button type="button" class="rounded-xl border border-dashed border-slate-300 dark:border-white/20 bg-transparent px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text" data-edit-group="${g.id}">Edit</button>
         <button type="button" class="rounded-xl border border-red-400/35 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-400 transition hover:bg-red-500/20" data-del-group="${g.id}">Hapus</button>
         </div>
       </td>`;
@@ -1190,18 +1375,18 @@ async function loadUsersPanel() {
     const today = Number(u.messages_sent_today ?? 0);
     const d7 = Number(u.messages_sent_7d ?? 0);
     tr.innerHTML = `
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left tabular-nums">${u.id}</td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left">${escapeHtml(u.full_name || '—')}</td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left">${escapeHtml(u.email)}</td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left">${escapeHtml(u.role)}</td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left tabular-nums">${devices}</td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left text-sm text-wg-muted">${lastLogin}</td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left tabular-nums">${today}</td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left tabular-nums text-wg-muted">${d7}</td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5 text-left">${keyCell}</td>
-      <td class="border-b border-white/[0.08] px-3 py-2.5">
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left tabular-nums">${u.id}</td>
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left">${escapeHtml(u.full_name || '—')}</td>
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left">${escapeHtml(u.email)}</td>
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left">${escapeHtml(u.role)}</td>
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left tabular-nums">${devices}</td>
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-sm text-wg-muted">${lastLogin}</td>
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left tabular-nums">${today}</td>
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left tabular-nums text-wg-muted">${d7}</td>
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left">${keyCell}</td>
+      <td class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5">
         <div class="flex flex-wrap gap-1.5 whitespace-nowrap">
-        <button type="button" class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text disabled:opacity-45" data-reg="${u.id}">API key baru</button>
+        <button type="button" class="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.035] px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-slate-300 dark:hover:border-white/[0.10] hover:bg-slate-200/90 dark:hover:bg-white/[0.07] hover:text-wg-text disabled:opacity-45" data-reg="${u.id}">API key baru</button>
         <button type="button" class="rounded-xl border border-red-400/35 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-400 transition hover:bg-red-500/20 disabled:opacity-45" data-del-user="${u.id}" ${u.id === currentUser?.id ? 'disabled' : ''}>Hapus</button>
         </div>
       </td>`;
@@ -1256,10 +1441,8 @@ document.querySelectorAll('[data-menu-tab]').forEach((btn) => {
       const tab = btn.getAttribute('data-menu-tab');
       if (!tab) return;
       closeAddDevicePanel({ skipUrl: true });
-      await showTab(tab);
+      await showTab(tab, btn);
       setDashboardHashFromState(tab, false);
-      const details = btn.closest('details');
-      if (details) details.removeAttribute('open');
     })();
   });
 });
@@ -1368,6 +1551,9 @@ $('btnSend').addEventListener('click', () => {
 });
 
 $('btnLogout').addEventListener('click', () => {
+  $('userMenuPanel')?.classList.add('hidden');
+  $('btnUserMenu')?.setAttribute('aria-expanded', 'false');
+  document.querySelector('.topbar-user-chevron')?.classList.remove('rotate-180');
   const b = $('btnLogout');
   void withSpinner(b, async () => {
     try {
@@ -1427,9 +1613,7 @@ $('btnUpdateProfile')?.addEventListener('click', () => {
       });
       currentUser = { ...currentUser, ...out.user };
       $('profileFullName').value = out.user.full_name || '';
-      $('userEmail').textContent = out.user.full_name
-        ? `${out.user.full_name} (${out.user.email})`
-        : out.user.email;
+      applyTopbarUserIdentity(out.user);
       $('profileEmail').value = out.user.email;
       toast('Profil diperbarui.', 'ok');
     } catch (e) {
@@ -1567,8 +1751,7 @@ async function boot() {
     initAllSelect2IfNeeded();
     const { user } = await apiJson('/auth/me');
     currentUser = user;
-    $('userEmail').textContent = user.full_name ? `${user.full_name} (${user.email})` : user.email;
-    $('userRole').textContent = user.role;
+    applyTopbarUserIdentity(user);
     if (user.role !== 'admin') $('nav-users').hidden = true;
     await loadDevices();
     if (!location.hash || location.hash === '#') {
@@ -1594,5 +1777,10 @@ window.addEventListener('pageshow', (ev) => {
     void syncDashboardFromHash();
   }
 });
+
+initDashboardThemeToggle();
+initSidebarToggle();
+initUserMenu();
+initTopbarNotifications();
 
 void boot();

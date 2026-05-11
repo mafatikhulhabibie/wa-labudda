@@ -72,7 +72,7 @@ export function mountCombobox(container, options) {
 
   trigger.className =
 
-    'group flex min-h-[2.75rem] w-full max-w-full cursor-pointer items-center gap-3 rounded-lg border border-white/[0.14] bg-white/[0.04] px-3.5 py-2 text-left text-sm text-wg-text shadow-sm outline-none transition-colors hover:border-white/[0.2] hover:bg-white/[0.06] focus-visible:border-sky-500/50 focus-visible:ring-[3px] focus-visible:ring-sky-500/15 aria-expanded:border-sky-500/45 aria-expanded:bg-black/50 aria-expanded:ring-2 aria-expanded:ring-sky-500/25';
+    'group flex min-h-[2.75rem] w-full max-w-full cursor-pointer items-center gap-3 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-left text-sm text-wg-text shadow-sm outline-none transition-colors hover:border-slate-400 hover:bg-slate-50 focus-visible:border-sky-500/50 focus-visible:ring-[3px] focus-visible:ring-sky-500/15 aria-expanded:border-sky-500/45 aria-expanded:bg-sky-50 aria-expanded:ring-2 aria-expanded:ring-sky-500/25 dark:border-white/[0.14] dark:bg-white/[0.04] dark:hover:border-white/[0.2] dark:hover:bg-white/[0.06] dark:aria-expanded:bg-black/50 dark:aria-expanded:ring-sky-500/25';
 
   trigger.setAttribute('aria-haspopup', 'listbox');
 
@@ -90,7 +90,7 @@ export function mountCombobox(container, options) {
 
   caret.className =
 
-    'pointer-events-none flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.04] text-wg-muted transition-transform duration-200 group-aria-expanded:rotate-180';
+    'pointer-events-none flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-100 text-wg-muted transition-transform duration-200 group-aria-expanded:rotate-180 dark:border-white/[0.06] dark:bg-white/[0.04]';
 
   caret.setAttribute('aria-hidden', 'true');
 
@@ -108,7 +108,7 @@ export function mountCombobox(container, options) {
 
   panel.className =
 
-    'flex max-h-[min(360px,55vh)] flex-col overflow-hidden rounded-lg border border-white/15 bg-[#0f141c] shadow-[0_20px_50px_rgba(0,0,0,0.55)] ring-1 ring-black/50 backdrop-blur-xl';
+    'flex max-h-[min(360px,55vh)] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_20px_50px_rgb(15_23_42/0.15)] ring-1 ring-slate-900/10 backdrop-blur-xl dark:border-white/15 dark:bg-[#0f141c] dark:shadow-[0_20px_50px_rgba(0,0,0,0.55)] dark:ring-black/50';
 
   panel.hidden = true;
 
@@ -118,7 +118,7 @@ export function mountCombobox(container, options) {
 
   const searchWrap = document.createElement('div');
 
-  searchWrap.className = 'border-b border-white/[0.1] bg-black/30 px-2 pb-2 pt-2';
+  searchWrap.className = 'border-b border-slate-200 bg-slate-50 px-2 pb-2 pt-2 dark:border-white/[0.1] dark:bg-black/30';
 
   const search = document.createElement('input');
 
@@ -126,7 +126,7 @@ export function mountCombobox(container, options) {
 
   search.className =
 
-    'm-0 box-border w-full rounded-lg border border-white/[0.12] bg-black/45 px-3 py-2.5 text-sm text-wg-text outline-none placeholder:text-wg-muted/75 focus:border-sky-500/45 focus:ring-2 focus:ring-sky-500/20';
+    'm-0 box-border w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-wg-text outline-none placeholder:text-wg-muted/75 focus:border-sky-500/45 focus:ring-2 focus:ring-sky-500/20 dark:border-white/[0.12] dark:bg-black/45';
 
   search.placeholder = searchPlaceholder;
 
@@ -142,7 +142,7 @@ export function mountCombobox(container, options) {
 
   const liBase =
 
-    'cursor-pointer rounded-md border border-transparent px-3 py-2.5 text-left text-sm text-wg-text transition-colors hover:bg-white/[0.07]';
+    'cursor-pointer rounded-md border border-transparent px-3 py-2.5 text-left text-sm text-wg-text transition-colors hover:bg-slate-100 dark:hover:bg-white/[0.07]';
 
   const liHi =
 

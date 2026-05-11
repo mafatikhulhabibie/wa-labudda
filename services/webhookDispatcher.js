@@ -15,6 +15,12 @@ function toDigitsOrNull(value) {
   return digits || null;
 }
 
+/** Root fields ala Fonnte / CodeIgniter: selalu string agar aman untuk `$data['sender']` dll. */
+function fonnteRootStr(value) {
+  if (value === null || value === undefined) return '';
+  return String(value);
+}
+
 /**
  * @param {string} event
  * @param {string} sessionId
@@ -22,10 +28,13 @@ function toDigitsOrNull(value) {
  * @param {{ normalizeSenderDigits: boolean }} opts
  */
 function buildFonnteLikePayload(event, sessionId, data, opts) {
+  const prim = data?.primary || null;
   const firstIncoming = data?.summary?.[0] || null;
   const firstMessage = Array.isArray(data?.messages) ? (data.messages[0] ?? null) : null;
   const rawSender =
-    firstIncoming?.from_me
+    prim?.participant ||
+    prim?.remote_jid ||
+    (firstIncoming?.from_me
       ? null
       : firstMessage?.participant ||
         firstIncoming?.participant_jid ||
@@ -34,16 +43,22 @@ function buildFonnteLikePayload(event, sessionId, data, opts) {
         data?.chat_jid ||
         data?.number ||
         data?.sender ||
-        null;
+        null);
   const sender = opts.normalizeSenderDigits ? toDigitsOrNull(rawSender) : rawSender;
-  const name = firstMessage?.pushName || data?.name || '';
-  const message = firstIncoming?.text || firstMessage?.text || data?.message || data?.text || '';
+  const name = prim?.push_name || firstMessage?.pushName || data?.name || '';
+  const message =
+    prim?.text || firstIncoming?.text || firstMessage?.text || data?.message || data?.text || '';
   const url = firstMessage?.url || data?.url || '';
   const filename = firstMessage?.filename || data?.filename || '';
-  const mimetype = firstMessage?.mimetype || data?.mimetype || '';
-  const extension = data?.extension || (mimetype.includes('/') ? mimetype.split('/')[1] : '');
+  const mimetype = String(firstMessage?.mimetype || data?.mimetype || '');
+  const extension =
+    data?.extension || (mimetype.includes('/') ? mimetype.split('/')[1] || '' : '');
   const rawMember =
-    firstIncoming?.participant_jid || firstMessage?.participant || data?.participant_jid || null;
+    prim?.participant ||
+    firstIncoming?.participant_jid ||
+    firstMessage?.participant ||
+    data?.participant_jid ||
+    null;
   const member = opts.normalizeSenderDigits ? toDigitsOrNull(rawMember) : rawMember;
 
   return {
@@ -52,16 +67,37 @@ function buildFonnteLikePayload(event, sessionId, data, opts) {
     session_id: sessionId,
     sent_at: new Date().toISOString(),
     data,
-    // Format mirip Fonnte (root-level fields)
-    device: sessionId,
-    sender,
-    message,
-    member,
-    name,
-    location: data?.location || '',
-    url,
-    filename,
-    extension,
+    // Format mirip Fonnte (root-level fields, selalu string)
+    device: fonnteRootStr(sessionId),
+    sender: fonnteRootStr(sender),
+    message: fonnteRootStr(message),
+    member: fonnteRootStr(member),
+    name: fonnteRootStr(name),
+    location: fonnteRootStr(data?.location),
+    url: fonnteRootStr(url),
+    filename: fonnteRootStr(filename),
+    extension: fonnteRootStr(extension),
+  };
+}
+
+/**
+ * Body JSON untuk POST webhook (per-device atau URL global).
+ * @param {string} sessionId
+ * @param {string} event
+ * @param {unknown} data
+ */
+export function buildWebhookPostBody(sessionId, event, data) {
+  const cfg = getConfig();
+  if (cfg.webhookPayloadMode === 'fonnte') {
+    return buildFonnteLikePayload(event, sessionId, data, {
+      normalizeSenderDigits: cfg.webhookNormalizeSenderDigits,
+    });
+  }
+  return {
+    event,
+    session_id: sessionId,
+    sent_at: new Date().toISOString(),
+    data,
   };
 }
 
@@ -74,18 +110,7 @@ export async function dispatchDeviceWebhook(sessionId, event, data) {
   const hook = await getWebhookBySessionId(sessionId);
   if (!hook || !hook.enabled || !hook.url) return { dispatched: false, reason: 'disabled_or_missing' };
 
-  const cfg = getConfig();
-  const payload =
-    cfg.webhookPayloadMode === 'fonnte'
-      ? buildFonnteLikePayload(event, sessionId, data, {
-          normalizeSenderDigits: cfg.webhookNormalizeSenderDigits,
-        })
-      : {
-          event,
-          session_id: sessionId,
-          sent_at: new Date().toISOString(),
-          data,
-        };
+  const payload = buildWebhookPostBody(sessionId, event, data);
 
   const res = await fetch(hook.url, {
     method: 'POST',

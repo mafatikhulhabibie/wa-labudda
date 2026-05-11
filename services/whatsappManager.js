@@ -16,10 +16,86 @@ import { toWhatsAppJid } from '../utils/phoneFormat.js';
 import { InMemoryJobQueue } from './queue/inMemoryJobQueue.js';
 import { broadcastInbox } from './inboxSocket.js';
 import { summarizeMessagesUpsert } from '../utils/waUpsertSummary.js';
-import { dispatchDeviceWebhook } from './webhookDispatcher.js';
+import { buildWebhookPostBody, dispatchDeviceWebhook } from './webhookDispatcher.js';
 import { processIncomingAutoReply } from './autoResponderService.js';
 
 const waLogger = pino({ level: 'silent' });
+
+/**
+ * Pesan masuk pertama (bukan fromMe) dalam batch upsert — stabil untuk webhook consumer.
+ * @param {import('@whiskeysockets/baileys').BaileysEventMap['messages.upsert']} payload
+ */
+function pickPrimaryIncomingMessage(payload) {
+  const rawList = payload?.messages;
+  if (!Array.isArray(rawList)) return null;
+  for (const m of rawList) {
+    if (!m?.key) continue;
+    if (m.key.fromMe) continue;
+    const jid = m.key.remoteJid;
+    if (!jid || jid === 'status@broadcast') continue;
+    const msg = m.message;
+    const text =
+      msg?.conversation ||
+      msg?.extendedTextMessage?.text ||
+      msg?.imageMessage?.caption ||
+      msg?.videoMessage?.caption ||
+      msg?.documentMessage?.caption ||
+      '';
+    return {
+      remote_jid: jid,
+      participant: m.key.participant || null,
+      text: String(text || ''),
+      push_name: String(m.pushName || ''),
+      id: m.key.id || null,
+    };
+  }
+  return null;
+}
+
+/**
+ * @param {import('@whiskeysockets/baileys').BaileysEventMap['messages.upsert']} payload
+ */
+function mapMessagesForWebhookSnapshot(payload) {
+  return payload.messages?.map((m) => ({
+    id: m.key?.id,
+    remoteJid: m.key?.remoteJid,
+    participant: m.key?.participant || null,
+    fromMe: m.key?.fromMe,
+    messageTimestamp: m.messageTimestamp,
+    pushName: m.pushName || '',
+    text:
+      m.message?.conversation ||
+      m.message?.extendedTextMessage?.text ||
+      m.message?.imageMessage?.caption ||
+      m.message?.videoMessage?.caption ||
+      m.message?.documentMessage?.caption ||
+      '',
+    url:
+      m.message?.imageMessage?.url ||
+      m.message?.videoMessage?.url ||
+      m.message?.documentMessage?.url ||
+      '',
+    filename: m.message?.documentMessage?.fileName || '',
+    mimetype:
+      m.message?.imageMessage?.mimetype ||
+      m.message?.videoMessage?.mimetype ||
+      m.message?.documentMessage?.mimetype ||
+      '',
+  }));
+}
+
+/**
+ * @param {string} sessionId
+ * @param {import('@whiskeysockets/baileys').BaileysEventMap['messages.upsert']} payload
+ */
+function buildIncomingWebhookData(sessionId, payload) {
+  return {
+    type: payload.type,
+    primary: pickPrimaryIncomingMessage(payload),
+    messages: mapMessagesForWebhookSnapshot(payload),
+    summary: summarizeMessagesUpsert(sessionId, payload),
+  };
+}
 
 /**
  * @param {string | null | undefined} userId
@@ -217,37 +293,8 @@ class ManagedSession {
           logger.warn({ err, sessionId: this.sessionId }, 'incoming webhook handler failed');
         }
       }
-      const summary = summarizeMessagesUpsert(this.sessionId, payload);
-      await dispatchDeviceWebhook(this.sessionId, 'message.incoming', {
-        type: payload.type,
-        messages: payload.messages?.map((m) => ({
-          id: m.key?.id,
-          remoteJid: m.key?.remoteJid,
-          participant: m.key?.participant || null,
-          fromMe: m.key?.fromMe,
-          messageTimestamp: m.messageTimestamp,
-          pushName: m.pushName || '',
-          text:
-            m.message?.conversation ||
-            m.message?.extendedTextMessage?.text ||
-            m.message?.imageMessage?.caption ||
-            m.message?.videoMessage?.caption ||
-            m.message?.documentMessage?.caption ||
-            '',
-          url:
-            m.message?.imageMessage?.url ||
-            m.message?.videoMessage?.url ||
-            m.message?.documentMessage?.url ||
-            '',
-          filename: m.message?.documentMessage?.fileName || '',
-          mimetype:
-            m.message?.imageMessage?.mimetype ||
-            m.message?.videoMessage?.mimetype ||
-            m.message?.documentMessage?.mimetype ||
-            '',
-        })),
-        summary,
-      }).catch(() => {});
+      const webhookData = buildIncomingWebhookData(this.sessionId, payload);
+      await dispatchDeviceWebhook(this.sessionId, 'message.incoming', webhookData).catch(() => {});
       try {
         await processIncomingAutoReply({
           sessionId: this.sessionId,
@@ -480,20 +527,12 @@ export class WhatsAppManager {
   }
 
   async _dispatchIncomingWebhook(sessionId, webhookUrl, payload) {
-    const body = {
-      session_id: sessionId,
-      type: payload.type,
-      messages: payload.messages?.map((m) => ({
-        id: m.key?.id,
-        remoteJid: m.key?.remoteJid,
-        fromMe: m.key?.fromMe,
-        messageTimestamp: m.messageTimestamp,
-      })),
-    };
+    const data = buildIncomingWebhookData(sessionId, payload);
+    const body = buildWebhookPostBody(sessionId, 'message.incoming', data);
 
     const res = await fetch(webhookUrl, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', 'user-agent': 'wa-gateway-webhook/1.0' },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(15_000),
     });

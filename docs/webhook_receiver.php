@@ -47,31 +47,40 @@ if (!is_array($payload)) {
 $event = asString($payload['event'] ?? null) ?? 'unknown';
 $sessionId = asString($payload['session_id'] ?? null) ?? 'unknown';
 $data = is_array($payload['data'] ?? null) ? $payload['data'] : [];
+$primary = (isset($data['primary']) && is_array($data['primary'])) ? $data['primary'] : [];
 
 $summary0 = (isset($data['summary'][0]) && is_array($data['summary'][0])) ? $data['summary'][0] : [];
 $message0 = (isset($data['messages'][0]) && is_array($data['messages'][0])) ? $data['messages'][0] : [];
+
+[$fromLoopJid, $fromLoopText] = pickFirstIncomingFromMessages($data);
 
 $device = asString($payload['device'] ?? null)
     ?? asString($data['device'] ?? null)
     ?? ($sessionId !== 'unknown' ? $sessionId : null);
 
 $sender = asString($payload['sender'] ?? null)
+    ?? asString($primary['participant'] ?? null)
+    ?? asString($primary['remote_jid'] ?? null)
     ?? asString($data['sender'] ?? null)
     ?? asString($data['number'] ?? null)
     ?? asString($summary0['chat_jid'] ?? null)
     ?? asString($message0['participant'] ?? null)
-    ?? asString($message0['remoteJid'] ?? null);
+    ?? asString($message0['remoteJid'] ?? null)
+    ?? asString($fromLoopJid !== '' ? $fromLoopJid : null);
 
 $name = asString($payload['name'] ?? null)
     ?? asString($data['name'] ?? null)
+    ?? asString($primary['push_name'] ?? null)
     ?? asString($message0['pushName'] ?? null)
     ?? '';
 
 $message = asString($payload['message'] ?? null)
+    ?? asString($primary['text'] ?? null)
     ?? asString($data['message'] ?? null)
     ?? asString($data['text'] ?? null)
     ?? asString($summary0['text'] ?? null)
     ?? asString($message0['text'] ?? null)
+    ?? asString($fromLoopText !== '' ? $fromLoopText : null)
     ?? '';
 
 $url = asString($payload['url'] ?? null)
@@ -129,6 +138,36 @@ function asString(mixed $value): ?string
     }
     $v = trim($value);
     return $v === '' ? null : $v;
+}
+
+/**
+ * @return array{0: string, 1: string}
+ */
+function pickFirstIncomingFromMessages(array $data): array
+{
+    $msgs = $data['messages'] ?? null;
+    if (!is_array($msgs)) {
+        return ['', ''];
+    }
+    foreach ($msgs as $m) {
+        if (!is_array($m)) {
+            continue;
+        }
+        if (!empty($m['fromMe'])) {
+            continue;
+        }
+        $jid = strval($m['remoteJid'] ?? $m['remote_jid'] ?? '');
+        if ($jid === '' || $jid === 'status@broadcast') {
+            continue;
+        }
+        $participant = strval($m['participant'] ?? '');
+        $target = $participant !== '' ? $participant : $jid;
+        $text = strval($m['text'] ?? '');
+
+        return [$target, $text];
+    }
+
+    return ['', ''];
 }
 
 function matchAutoReply(string $message): string

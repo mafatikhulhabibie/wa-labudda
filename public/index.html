@@ -1,6 +1,24 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full scroll-smooth [color-scheme:dark]">
+<html lang="id" class="h-full scroll-smooth dark">
   <head>
+    <meta name="color-scheme" content="dark light" />
+    <script>
+      (function () {
+        try {
+          var k = 'wg-theme';
+          var root = document.documentElement;
+          if (localStorage.getItem(k) === 'light') {
+            root.classList.remove('dark');
+            root.classList.add('light');
+            root.style.colorScheme = 'light';
+          } else {
+            root.classList.remove('light');
+            root.classList.add('dark');
+            root.style.colorScheme = 'dark';
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>wa-labudda — Dashboard</title>
@@ -13,194 +31,400 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
     <link rel="stylesheet" href="/styles.css" />
     <style>
-      .select2-container--default .select2-selection--single {
+      html:not(.dark) .select2-container--default .select2-selection--single {
+        height: 44px;
+        border-radius: 0.75rem;
+        border: 1px solid rgb(226 232 240);
+        background: #fff;
+      }
+      html:not(.dark) .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 42px;
+        padding-left: 12px;
+        color: rgb(15 23 42);
+      }
+      html:not(.dark) .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 42px;
+        right: 8px;
+      }
+      html:not(.dark) .select2-dropdown {
+        border: 1px solid rgb(226 232 240);
+        border-radius: 0.75rem;
+        overflow: hidden;
+        background: #fff;
+      }
+      html:not(.dark) .select2-search--dropdown {
+        padding: 8px;
+        background: rgb(248 250 252);
+      }
+      html:not(.dark) .select2-container--default .select2-search--dropdown .select2-search__field {
+        border-radius: 0.5rem;
+        border: 1px solid rgb(226 232 240);
+        background: #fff;
+        color: rgb(15 23 42);
+      }
+      html:not(.dark) .select2-results__option {
+        padding: 9px 12px;
+        color: rgb(51 65 85);
+      }
+      html:not(.dark)
+        .select2-container--default
+        .select2-results__option--highlighted.select2-results__option--selectable {
+        background: #0284c7;
+        color: #fff;
+      }
+      html.dark .select2-container--default .select2-selection--single {
         height: 44px;
         border-radius: 0.75rem;
         border: 1px solid rgba(255, 255, 255, 0.14);
         background: rgba(255, 255, 255, 0.04);
       }
-      .select2-container--default .select2-selection--single .select2-selection__rendered {
+      html.dark .select2-container--default .select2-selection--single .select2-selection__rendered {
         line-height: 42px;
         padding-left: 12px;
         color: #e7eef6;
       }
-      .select2-container--default .select2-selection--single .select2-selection__arrow {
+      html.dark .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 42px;
         right: 8px;
       }
-      .select2-dropdown {
+      html.dark .select2-dropdown {
         border: 1px solid rgba(255, 255, 255, 0.14);
         border-radius: 0.75rem;
         overflow: hidden;
         background: #0f141c;
       }
-      .select2-search--dropdown {
+      html.dark .select2-search--dropdown {
         padding: 8px;
         background: rgba(0, 0, 0, 0.25);
       }
-      .select2-container--default .select2-search--dropdown .select2-search__field {
+      html.dark .select2-container--default .select2-search--dropdown .select2-search__field {
         border-radius: 0.5rem;
         border: 1px solid rgba(255, 255, 255, 0.14);
         background: rgba(0, 0, 0, 0.45);
         color: #e7eef6;
       }
-      .select2-results__option {
+      html.dark .select2-results__option {
         padding: 9px 12px;
         color: #d8e2ee;
       }
-      .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+      html.dark
+        .select2-container--default
+        .select2-results__option--highlighted.select2-results__option--selectable {
         background: #0284c7;
         color: #fff;
       }
     </style>
   </head>
   <body
-    class="min-h-full overflow-x-hidden bg-wg-bg0 bg-[radial-gradient(1200px_600px_at_10%_-10%,#132032_0%,transparent_55%),radial-gradient(900px_500px_at_100%_0%,#0d2620_0%,transparent_50%)] font-sans text-base leading-normal text-wg-text antialiased"
+    class="wg-page-bg flex min-h-full flex-col overflow-x-hidden font-sans text-base leading-normal text-wg-text antialiased md:flex-row md:items-stretch"
   >
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem('wg-sidebar-expanded') === '1') document.body.classList.add('wg-sidebar-expanded');
+        } catch (e) {}
+      })();
+    </script>
+    <div class="wg-grid-overlay pointer-events-none fixed inset-0 z-0" aria-hidden="true"></div>
     <div
-      class="pointer-events-none fixed inset-0 z-0 bg-[length:48px_48px] [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_20%,black,transparent)]"
+      class="pointer-events-none fixed -left-28 -top-36 z-0 h-[520px] w-[580px] rounded-[50%] blur-[120px] wg-orb-tl"
       aria-hidden="true"
     ></div>
     <div
-      class="pointer-events-none fixed -left-20 -top-[120px] z-0 h-[420px] w-[420px] rounded-full bg-[#1a4d3a] opacity-35 blur-[90px]"
-      aria-hidden="true"
-    ></div>
-    <div
-      class="pointer-events-none fixed -bottom-40 -right-[100px] z-0 h-[420px] w-[420px] rounded-full bg-[#1e3a5f] opacity-35 blur-[90px]"
+      class="pointer-events-none fixed -bottom-48 -right-28 z-0 h-[520px] w-[580px] rounded-[50%] blur-[120px] wg-orb-br"
       aria-hidden="true"
     ></div>
 
-    <header
-      class="relative z-[2] mx-auto flex max-w-[1180px] items-center justify-between gap-3 px-6 py-5"
+    <aside
+      id="dashboard-sidebar"
+      class="wg-sidebar-shell relative z-[2] flex w-full shrink-0 flex-col border-b border-slate-200 px-3 py-4 backdrop-blur-[12px] md:sticky md:top-0 md:h-screen md:max-h-screen md:min-h-0 md:w-[280px] md:overflow-hidden md:border-b-0 md:border-r md:border-slate-200 md:px-4 md:py-6 lg:py-4 dark:border-white/[0.08] dark:md:border-white/[0.07]"
     >
-      <div class="flex min-w-[200px] flex-1 items-center gap-4">
-        <span
-          class="grid h-12 w-12 shrink-0 place-items-center rounded-[14px] border border-wg-accent/35 bg-gradient-to-br from-wg-accent/20 to-wg-accent/5 text-wg-accent"
-          aria-hidden="true"
-        >
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 2C6.48 2 2 6.15 2 11.25c0 1.8.52 3.48 1.42 4.93L2 22l6.08-1.58A9.9 9.9 0 0 0 12 20.5c5.52 0 10-4.15 10-9.25S17.52 2 12 2Z"
-              fill="currentColor"
-              opacity=".15"
-            />
-            <path
-              d="M17.5 14.2c-.25.12-1.47.72-1.7.8-.23.08-.4.12-.57-.12-.17-.25-.65-.8-.8-.96-.15-.17-.3-.18-.55-.06-.25.12-1.05.39-2 1.24-.74.66-1.24 1.47-1.38 1.72-.15.25-.02.38.11.5.12.12.25.3.38.45.12.15.17.25.25.42.08.17.04.32-.02.45-.06.12-.57 1.38-.78 1.89-.2.5-.42.43-.57.44l-.48.01c-.17 0-.45-.06-.68-.3-.23-.25-.9-.88-.9-2.15 0-1.27.92-2.5 1.05-2.67.12-.17 1.82-2.78 4.4-3.9 1.23-.53 2.15-.85 2.89-1.09 1.21-.39 2.31-.33 3.18.2.87.53 1.4 1.25 1.35 2.2-.05.95-.35 1.55-.6 1.8Z"
-              fill="currentColor"
-            />
-          </svg>
-        </span>
-        <div>
-          <h1 class="m-0 text-2xl font-bold tracking-tight">wa-labudda</h1>
-          <p class="mt-0.5 text-sm text-wg-muted">
-            <span id="userEmail"></span> · <span id="userRole"></span>
-          </p>
+      <div class="sidebar-header-row shrink-0 px-1 pt-0.5">
+        <div class="sidebar-header-logo flex w-full shrink-0 items-center justify-center md:justify-start">
+          <span
+            class="wg-logo-mesh grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-wg-accent/35 text-wg-accent"
+            aria-hidden="true"
+          >
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 2C6.48 2 2 6.15 2 11.25c0 1.8.52 3.48 1.42 4.93L2 22l6.08-1.58A9.9 9.9 0 0 0 12 20.5c5.52 0 10-4.15 10-9.25S17.52 2 12 2Z"
+                fill="currentColor"
+                opacity=".15"
+              />
+              <path
+                d="M17.5 14.2c-.25.12-1.47.72-1.7.8-.23.08-.4.12-.57-.12-.17-.25-.65-.8-.8-.96-.15-.17-.3-.18-.55-.06-.25.12-1.05.39-2 1.24-.74.66-1.24 1.47-1.38 1.72-.15.25-.02.38.11.5.12.12.25.3.38.45.12.15.17.25.25.42.08.17.04.32-.02.45-.06.12-.57 1.38-.78 1.89-.2.5-.42.43-.57.44l-.48.01c-.17 0-.45-.06-.68-.3-.23-.25-.9-.88-.9-2.15 0-1.27.92-2.5 1.05-2.67.12-.17 1.82-2.78 4.4-3.9 1.23-.53 2.15-.85 2.89-1.09 1.21-.39 2.31-.33 3.18.2.87.53 1.4 1.25 1.35 2.2-.05.95-.35 1.55-.6 1.8Z"
+                fill="currentColor"
+              />
+            </svg>
+          </span>
         </div>
       </div>
+
       <nav
-        class="flex max-w-full flex-nowrap gap-1.5 overflow-x-auto rounded-xl border border-white/[0.08] bg-black/25 p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        aria-label="Bagian utama"
+        class="sidebar-nav-scroll mt-7 flex min-h-0 w-full flex-1 flex-col gap-0.5 overflow-y-auto overflow-x-hidden overscroll-contain lg:items-stretch"
+        aria-label="Navigasi dashboard"
       >
         <button
           type="button"
-          class="nav-tab rounded-lg border-0 bg-white/[0.07] px-3.5 py-2 text-sm font-semibold text-wg-text transition-colors"
+          class="nav-tab wg-nav-active sidebar-nav-item rounded-lg border-0 border-l-[3px] border-wg-accent px-3 py-2.5 text-left text-sm font-medium text-wg-accent transition-colors cursor-pointer"
           data-tab="devices"
+          title="Device"
+          aria-label="Device"
         >
-          Device
+          <span class="sidebar-nav-text">Device</span>
         </button>
         <button
           type="button"
-          class="nav-tab rounded-lg border-0 bg-transparent px-3.5 py-2 text-sm font-semibold text-wg-muted transition-colors hover:text-wg-text"
+          class="nav-tab sidebar-nav-item rounded-lg border-0 border-l-[3px] border-transparent px-3 py-2.5 text-left text-sm font-medium text-wg-muted transition-colors hover:bg-slate-200 dark:hover:bg-white/[0.06] hover:text-wg-text cursor-pointer"
           data-tab="send"
+          title="Kirim pesan"
+          aria-label="Kirim pesan"
         >
-          Kirim Pesan
+          <span class="sidebar-nav-text">Kirim Pesan</span>
         </button>
         <button
           type="button"
-          class="nav-tab rounded-lg border-0 bg-transparent px-3.5 py-2 text-sm font-semibold text-wg-muted transition-colors hover:text-wg-text"
+          class="nav-tab sidebar-nav-item rounded-lg border-0 border-l-[3px] border-transparent px-3 py-2.5 text-left text-sm font-medium text-wg-muted transition-colors hover:bg-slate-200 dark:hover:bg-white/[0.06] hover:text-wg-text cursor-pointer"
           data-tab="contacts"
+          title="Kontak"
+          aria-label="Kontak"
         >
-          Kontak
+          <span class="sidebar-nav-text">Kontak</span>
         </button>
         <button
           type="button"
-          class="nav-tab rounded-lg border-0 bg-transparent px-3.5 py-2 text-sm font-semibold text-wg-muted transition-colors hover:text-wg-text"
+          class="nav-tab sidebar-nav-item rounded-lg border-0 border-l-[3px] border-transparent px-3 py-2.5 text-left text-sm font-medium text-wg-muted transition-colors hover:bg-slate-200 dark:hover:bg-white/[0.06] hover:text-wg-text cursor-pointer"
           data-tab="users"
           id="nav-users"
+          title="Users"
+          aria-label="Users"
         >
-          Users
+          <span class="sidebar-nav-text">Users</span>
+        </button>
+        <button
+          type="button"
+          data-menu-tab="docs"
+          class="menu-side-tab sidebar-nav-item rounded-lg border-0 border-l-[3px] border-transparent px-3 py-2.5 text-left text-sm font-medium text-wg-muted transition-colors hover:bg-slate-200 dark:hover:bg-white/[0.06] hover:text-wg-text cursor-pointer"
+          title="API"
+          aria-label="Dokumentasi API"
+        >
+          <span class="sidebar-nav-text">API</span>
+        </button>
+        <button
+          type="button"
+          data-menu-tab="profile"
+          class="menu-side-tab sidebar-nav-item rounded-lg border-0 border-l-[3px] border-transparent px-3 py-2.5 text-left text-sm font-medium text-wg-muted transition-colors hover:bg-slate-200 dark:hover:bg-white/[0.06] hover:text-wg-text cursor-pointer"
+          title="Profil"
+          aria-label="Profil"
+        >
+          <span class="sidebar-nav-text">Profil</span>
         </button>
       </nav>
-      <div class="relative shrink-0">
-        <details class="group">
-          <summary
-            class="list-none cursor-pointer rounded-xl border border-white/[0.06] bg-white/[0.035] px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text"
-          >
-            Menu
-          </summary>
-          <div class="absolute right-0 z-20 mt-2 min-w-[150px] space-y-1 rounded-xl border border-white/[0.08] bg-[rgba(18,26,36,0.95)] p-2 shadow-wg backdrop-blur-md">
-            <button
-              type="button"
-              data-menu-tab="docs"
-              class="block w-full rounded-lg border border-transparent px-3 py-2 text-left text-sm font-semibold text-wg-muted transition hover:border-white/[0.08] hover:bg-white/[0.06] hover:text-wg-text"
-            >
-              API
-            </button>
-            <button
-              type="button"
-              data-menu-tab="profile"
-              class="block w-full rounded-lg border border-transparent px-3 py-2 text-left text-sm font-semibold text-wg-muted transition hover:border-white/[0.08] hover:bg-white/[0.06] hover:text-wg-text"
-            >
-              Profil
-            </button>
-            <a
-              class="block rounded-lg border border-transparent px-3 py-2 text-sm text-wg-muted no-underline transition hover:border-white/[0.08] hover:bg-white/[0.06] hover:text-wg-text"
-              href="/wa.html"
-              >Chat WA</a
-            >
-            <button
-              type="button"
-              class="block w-full rounded-lg border border-transparent px-3 py-2 text-left text-sm font-semibold text-wg-muted transition hover:border-white/[0.08] hover:bg-white/[0.06] hover:text-wg-text"
-              id="btnLogout"
-            >
-              Keluar
-            </button>
-          </div>
-        </details>
-      </div>
-    </header>
+        <a
+          class="sidebar-nav-item sidebar-chat-wa mt-2 shrink-0 rounded-lg border-l-[3px] border-transparent px-3 py-2.5 text-sm font-medium text-wg-muted no-underline transition hover:bg-slate-200 dark:hover:bg-white/[0.06] hover:text-wg-text md:mt-0 md:border-t md:border-slate-200 md:pt-3 dark:md:border-white/[0.08]"
+          href="/wa.html"
+          title="Chat WhatsApp"
+          aria-label="Chat WhatsApp"
+        >
+          <span class="sidebar-nav-text">Chat WA</span>
+        </a>
+    </aside>
 
-    <main class="relative z-[1] mx-auto max-w-[1180px] px-6 pb-12">
+    <div class="relative z-[2] flex min-w-0 flex-1 flex-col">
+      <header class="dashboard-topbar sticky top-0 z-20 shrink-0">
+        <div class="dashboard-topbar-inner mx-auto flex w-full max-w-[1440px] items-center justify-between gap-3 md:gap-4">
+          <button
+            type="button"
+            id="btnSidebarToggle"
+            class="wg-theme-toggle hidden h-9 w-9 shrink-0 grid-cols-1 grid-rows-1 place-items-center rounded-lg text-wg-muted transition hover:brightness-110 lg:grid"
+            title="Bentangkan menu (tampilkan judul menu)"
+            aria-label="Bentangkan sidebar dan tampilkan judul menu"
+            aria-expanded="false"
+            aria-controls="dashboard-sidebar"
+          >
+            <svg
+              class="sidebar-ico-expand col-start-1 row-start-1 h-[1.125rem] w-[1.125rem]"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+            <svg
+              class="sidebar-ico-collapse col-start-1 row-start-1 h-[1.125rem] w-[1.125rem]"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+          </button>
+          <div class="flex min-w-0 flex-1 items-center justify-end gap-1.5 sm:gap-2">
+            <button
+              type="button"
+              id="btnThemeToggle"
+              class="wg-theme-toggle grid h-10 w-10 shrink-0 place-items-center rounded-full text-wg-muted transition hover:brightness-110"
+              title="Ganti tema"
+              aria-label="Ganti tema gelap atau terang"
+            >
+              <svg
+                class="block h-[1.125rem] w-[1.125rem] dark:hidden"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <svg
+                class="hidden h-[1.125rem] w-[1.125rem] dark:block"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              id="btnTopbarNotifications"
+              class="wg-theme-toggle relative grid h-10 w-10 shrink-0 place-items-center rounded-full text-wg-muted transition hover:brightness-110"
+              title="Notifikasi"
+              aria-label="Notifikasi"
+            >
+              <svg
+                class="h-[1.125rem] w-[1.125rem]"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+              </svg>
+              <span
+                class="pointer-events-none absolute right-[0.45rem] top-[0.45rem] h-2 w-2 rounded-full bg-amber-500 ring-2 ring-white dark:ring-slate-900"
+                aria-hidden="true"
+              ></span>
+            </button>
+            <div class="relative" id="userMenuWrap">
+              <button
+                type="button"
+                id="btnUserMenu"
+                class="topbar-user-trigger flex max-w-[min(60vw,17rem)] items-center gap-2 rounded-full border border-transparent py-1 pl-1 pr-1.5 text-left transition hover:border-slate-200 hover:bg-slate-100/90 dark:hover:border-white/[0.08] dark:hover:bg-white/[0.06] sm:pr-2"
+                title="Menu akun"
+                aria-label="Menu akun"
+                aria-expanded="false"
+                aria-haspopup="menu"
+                aria-controls="userMenuPanel"
+              >
+                <span
+                  id="topbarUserAvatar"
+                  class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-violet-200 text-[0.7rem] font-bold uppercase leading-none text-violet-900 shadow-sm dark:bg-violet-500/35 dark:text-violet-100"
+                  aria-hidden="true"
+                >?</span>
+                <span class="hidden min-w-0 flex-1 items-center gap-0.5 sm:inline-flex">
+                  <span class="truncate text-sm font-semibold text-wg-text" id="topbarUserName"></span>
+                  <svg
+                    class="topbar-user-chevron h-4 w-4 shrink-0 text-wg-muted transition-transform duration-200"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </span>
+              </button>
+              <div
+                id="userMenuPanel"
+                role="menu"
+                class="wg-glass-popover absolute right-0 top-[calc(100%+10px)] z-50 hidden min-w-[240px] py-1.5"
+                aria-labelledby="btnUserMenu"
+              >
+                <div class="border-b border-slate-200 px-4 py-3 dark:border-white/[0.08]" role="presentation">
+                  <p class="m-0 text-sm font-semibold leading-tight text-wg-text" id="userMenuPanelName"></p>
+                  <p class="m-0 mt-1 truncate text-xs leading-snug text-wg-muted" id="userMenuPanelEmail"></p>
+                </div>
+                <button
+                  type="button"
+                  role="menuitem"
+                  id="userMenuGoProfile"
+                  class="flex w-full px-4 py-2.5 text-left text-sm font-medium text-wg-text transition hover:bg-slate-100 dark:hover:bg-white/[0.06]"
+                >
+                  Profil &amp; kata sandi
+                </button>
+                <div class="my-1 h-px bg-slate-200 dark:bg-white/[0.08]" role="presentation"></div>
+                <button
+                  type="button"
+                  role="menuitem"
+                  id="btnLogout"
+                  class="flex w-full px-4 py-2.5 text-left text-sm font-medium text-red-500 transition hover:bg-red-500/10 dark:text-red-400"
+                >
+                  Keluar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main class="relative z-[1] mx-auto w-full max-w-[1440px] flex-1 px-4 py-5 pb-12 sm:px-6 md:py-6">
       <section
-        class="tab-panel mb-5 rounded-wg border border-white/[0.08] bg-[rgba(18,26,36,0.72)] p-5 shadow-wg backdrop-blur-[16px]"
+        class="tab-panel wg-panel mb-5"
         data-panel="devices"
       >
         <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <h2 class="m-0 text-[1.05rem] font-semibold">Device WhatsApp</h2>
+          <h2 class="m-0 flex items-center gap-2.5 text-[1.05rem] font-semibold">
+            <span class="inline-flex h-5 w-5 shrink-0 text-wg-accent" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-full w-full">
+                <rect x="7" y="2" width="10" height="20" rx="2" /><path d="M12 18h.01" />
+              </svg>
+            </span>
+            <span>Device WhatsApp</span>
+          </h2>
           <div class="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-3 py-2 text-xs font-semibold text-[#041208] transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+              class="rounded-xl border-0 wg-primary-fill px-3 py-2 text-xs font-semibold text-white transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
               id="btnOpenAddDevice"
             >
               Tambah device
             </button>
             <button
               type="button"
-              class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+              class="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.035] px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-slate-300 dark:hover:border-white/[0.10] hover:bg-slate-200/90 dark:hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
               id="btnReloadDevices"
             >
               Muat ulang
             </button>
           </div>
         </div>
-        <div id="addDevicePanel" hidden class="mt-4 rounded-xl border border-white/10 bg-black/25 p-4">
+        <div id="addDevicePanel" hidden class="mt-4 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-black/25 p-4">
           <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h3 class="m-0 text-base font-semibold" id="addDevicePanelTitle">Tambah device</h3>
             <button
               type="button"
               id="btnCloseAddDevicePanel"
-              class="rounded-lg border border-dashed border-white/20 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text"
+              class="rounded-lg border border-dashed border-slate-300 dark:border-white/20 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text"
               aria-label="Tutup form tambah device"
             >
               Tutup
@@ -215,11 +439,11 @@
                 maxlength="128"
                 placeholder="mis. Support Jakarta"
                 autocomplete="off"
-                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+                class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
               />
-              <small class="text-[0.72rem] text-wg-muted/90"
-                >Nama tampilan. Session ID di bawah otomatis dari label (format slug URL).</small
-              >
+              <small class="text-[0.72rem] text-wg-muted/90">
+                Nama tampilan. Session ID di bawah otomatis dari label (format slug URL).
+              </small>
             </label>
             <label class="flex flex-col gap-1.5">
               <span class="text-xs font-medium text-wg-muted">Session ID</span>
@@ -230,7 +454,7 @@
                 maxlength="64"
                 placeholder="(otomatis)"
                 spellcheck="false"
-                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+                class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
               />
               <small class="text-[0.72rem] text-wg-muted/90">1–64 karakter, awal huruf/angka. Huruf, angka, _, -</small>
             </label>
@@ -239,13 +463,13 @@
             <button
               type="button"
               id="btnCancelAddDevice"
-              class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text"
+              class="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-wg-muted transition hover:border-slate-300 dark:hover:border-white/[0.10] hover:bg-slate-200/90 dark:hover:bg-white/[0.07] hover:text-wg-text"
             >
               Batal
             </button>
             <button
               type="button"
-              class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-4 py-2.5 text-sm font-semibold text-[#041208] transition hover:brightness-110"
+              class="rounded-xl border-0 wg-primary-fill px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
               id="btnAddDevice"
             >
               Tambah device
@@ -257,21 +481,21 @@
             <thead>
               <tr>
                 <th
-                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
                 >
                   Session
                 </th>
                 <th
-                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
                 >
                   Label
                 </th>
                 <th
-                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
                 >
                   Status
                 </th>
-                <th class="border-b border-white/[0.08] px-3 py-2.5"></th>
+                <th class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5"></th>
               </tr>
             </thead>
             <tbody id="deviceTableBody"></tbody>
@@ -280,19 +504,19 @@
             Belum ada device. Gunakan tombol Tambah device.
           </p>
         </div>
-        <div id="qrPanel" hidden class="mt-4 rounded-xl border border-white/10 bg-black/25 p-4">
+        <div id="qrPanel" hidden class="mt-4 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-black/25 p-4">
           <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h3 class="m-0 text-base font-semibold" id="qrModalTitle">QR</h3>
             <button
               type="button"
-              class="rounded-lg border border-dashed border-white/20 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text"
+              class="rounded-lg border border-dashed border-slate-300 dark:border-white/20 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text"
               data-close-qr="1"
             >
               Tutup
             </button>
           </div>
           <div
-            class="relative grid min-h-[260px] place-items-center overflow-hidden rounded-[14px] border border-dashed border-white/[0.08] bg-black/40"
+            class="relative grid min-h-[260px] place-items-center overflow-hidden rounded-[14px] border border-dashed border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-black/40"
           >
             <img
               id="qrModalImg"
@@ -307,11 +531,18 @@
       </section>
 
       <section
-        class="tab-panel mb-5 hidden rounded-wg border border-white/[0.08] bg-[rgba(18,26,36,0.72)] p-5 shadow-wg backdrop-blur-[16px]"
+        class="tab-panel wg-panel mb-5 hidden"
         data-panel="send"
       >
-        <header class="mb-6 border-b border-white/[0.06] pb-5">
-          <h2 class="m-0 text-xl font-semibold tracking-tight text-wg-text">Kirim pesan</h2>
+        <header class="mb-6 border-b border-slate-200 dark:border-white/[0.06] pb-5">
+          <h2 class="m-0 flex items-center gap-2.5 text-xl font-semibold tracking-tight text-wg-text">
+            <span class="inline-flex h-5 w-5 shrink-0 text-wg-accent" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-full w-full">
+                <path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" />
+              </svg>
+            </span>
+            <span>Kirim pesan</span>
+          </h2>
           <p class="mt-1.5 max-w-2xl text-sm leading-relaxed text-wg-muted">
             Pilih device WhatsApp, isi nomor tujuan, lalu kirim teks atau lampiran (gambar / dokumen).
           </p>
@@ -319,7 +550,7 @@
 
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
           <div
-            class="flex min-w-0 flex-col gap-3 rounded-2xl border border-white/[0.06] bg-black/25 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+            class="flex min-w-0 flex-col gap-3 rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-black/25 p-4 shadow-[inset_0_1px_0_rgb(15_23_42/0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
           >
             <div class="flex items-start gap-3">
               <span
@@ -344,7 +575,7 @@
           </div>
 
           <div
-            class="flex min-w-0 flex-col gap-3 rounded-2xl border border-white/[0.06] bg-black/25 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+            class="flex min-w-0 flex-col gap-3 rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-black/25 p-4 shadow-[inset_0_1px_0_rgb(15_23_42/0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
           >
             <div class="flex items-start gap-3">
               <span
@@ -373,7 +604,7 @@
         </div>
 
         <div
-          class="mt-5 space-y-5 rounded-2xl border border-white/[0.06] bg-black/[0.18] p-4 sm:p-5 lg:mt-6"
+          class="mt-5 space-y-5 rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-black/[0.18] p-4 sm:p-5 lg:mt-6"
         >
           <label class="flex min-w-0 flex-col gap-2">
             <span class="text-xs font-medium uppercase tracking-wide text-wg-muted">Nomor tujuan</span>
@@ -382,7 +613,7 @@
               id="sendPhone"
               placeholder="6281234567890"
               autocomplete="tel"
-              class="min-h-[2.75rem] rounded-xl border border-white/[0.09] bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition placeholder:text-wg-muted/60 focus:border-wg-accent/50 focus:ring-[3px] focus:ring-wg-accent/10"
+              class="min-h-[2.75rem] rounded-xl border border-slate-200 dark:border-white/[0.09] bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition placeholder:text-wg-muted/60 focus:border-wg-accent/50 focus:ring-[3px] focus:ring-wg-accent/10"
             />
           </label>
 
@@ -392,11 +623,12 @@
               type="file"
               id="sendAttachment"
               accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar,.csv"
-              class="block w-full min-h-[2.75rem] cursor-pointer rounded-xl border border-dashed border-white/[0.12] bg-black/30 px-3 py-2.5 text-sm text-wg-muted transition hover:border-wg-accent/35 hover:bg-black/40 file:mr-3 file:inline-flex file:h-9 file:cursor-pointer file:items-center file:rounded-lg file:border file:border-white/[0.08] file:bg-white/[0.06] file:px-3.5 file:text-xs file:font-medium file:text-wg-text file:shadow-sm file:transition file:hover:border-white/[0.12] file:hover:bg-white/[0.09]"
+              class="block w-full min-h-[2.75rem] cursor-pointer rounded-xl border border-dashed border-slate-300 dark:border-white/[0.12] bg-slate-50 dark:bg-black/30 px-3 py-2.5 text-sm text-wg-muted transition hover:border-wg-accent/35 hover:bg-slate-100 dark:hover:bg-black/40 file:mr-3 file:inline-flex file:h-9 file:cursor-pointer file:items-center file:rounded-lg file:border file:border-slate-300 dark:file:border-white/[0.08] file:bg-slate-100 dark:file:bg-white/[0.06] file:px-3.5 file:text-xs file:font-medium file:text-wg-text file:shadow-sm file:transition file:hover:border-slate-400 dark:file:hover:border-white/[0.12] file:hover:bg-slate-200 dark:file:hover:bg-white/[0.09]"
             />
-            <small class="text-[0.72rem] leading-snug text-wg-muted/90"
-              >Gambar (JPEG, PNG, …) atau dokumen (PDF, Office, ZIP, …). Maks. 25 MB. Kolom <span class="font-medium text-wg-text">Pesan</span> dipakai sebagai caption jika ada lampiran.</small
-            >
+            <small class="text-[0.72rem] leading-snug text-wg-muted/90">
+              Gambar (JPEG, PNG, …) atau dokumen (PDF, Office, ZIP, …). Maks. 25 MB. Kolom
+              <span class="font-medium text-wg-text">Pesan</span> dipakai sebagai caption jika ada lampiran.
+            </small>
           </label>
 
           <label class="flex min-w-0 flex-col gap-2">
@@ -404,14 +636,14 @@
             <textarea
               id="sendMessage"
               rows="5"
-              class="min-h-[120px] resize-y rounded-xl border border-white/[0.09] bg-black/35 px-3.5 py-3 text-wg-text outline-none transition focus:border-wg-accent/50 focus:ring-[3px] focus:ring-wg-accent/10"
+              class="min-h-[120px] resize-y rounded-xl border border-slate-200 dark:border-white/[0.09] bg-white dark:bg-black/35 px-3.5 py-3 text-wg-text outline-none transition focus:border-wg-accent/50 focus:ring-[3px] focus:ring-wg-accent/10"
             ></textarea>
           </label>
 
           <div class="flex flex-wrap items-center gap-3 pt-1">
             <button
               type="button"
-              class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-6 py-2.5 text-sm font-semibold text-[#041208] shadow-[0_8px_24px_rgba(37,211,102,0.22)] transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+              class="rounded-xl border-0 wg-primary-fill px-6 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
               id="btnSend"
             >
               Kirim pesan
@@ -423,14 +655,21 @@
       </section>
 
       <section
-        class="tab-panel mb-5 hidden rounded-wg border border-white/[0.08] bg-[rgba(18,26,36,0.72)] p-5 shadow-wg backdrop-blur-[16px]"
+        class="tab-panel wg-panel mb-5 hidden"
         data-panel="contacts"
       >
         <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <h2 class="m-0 text-[1.05rem] font-semibold">Kontak</h2>
+          <h2 class="m-0 flex items-center gap-2.5 text-[1.05rem] font-semibold">
+            <span class="inline-flex h-5 w-5 shrink-0 text-wg-accent" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-full w-full">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+              </svg>
+            </span>
+            <span>Kontak</span>
+          </h2>
           <button
             type="button"
-            class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+            class="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.035] px-3 py-2 text-xs font-semibold text-wg-muted transition hover:border-slate-300 dark:hover:border-white/[0.10] hover:bg-slate-200/90 dark:hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
             id="btnReloadContacts"
           >
             Muat ulang
@@ -439,11 +678,11 @@
         <div class="mb-4 flex flex-wrap gap-2">
           <button
             type="button"
-            class="rounded-lg border-0 px-3.5 py-2 text-sm font-semibold transition-colors bg-white/[0.07] text-wg-text"
+            class="rounded-lg border-0 px-3.5 py-2 text-sm font-semibold transition-colors bg-slate-200/90 dark:bg-white/[0.07] text-wg-text"
             id="btnContactsTabContacts"
             data-contact-subtab="contacts"
           >
-            Kontak
+            <span class="action-btn-text">Kontak</span>
           </button>
           <button
             type="button"
@@ -451,7 +690,7 @@
             id="btnContactsTabGroups"
             data-contact-subtab="groups"
           >
-            Grup
+            <span class="action-btn-text">Grup</span>
           </button>
         </div>
         <div id="contactSubtabContacts">
@@ -472,13 +711,13 @@
                   id="contactSearch"
                   placeholder="Nama atau nomor…"
                   autocomplete="off"
-                  class="box-border min-h-[2.65rem] w-full rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition placeholder:text-wg-muted/70 focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+                  class="box-border min-h-[2.65rem] w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition placeholder:text-wg-muted/70 focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
                 />
               </label>
               <div class="flex flex-wrap gap-2 pb-0.5">
                 <button
                   type="button"
-                  class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-4 py-2.5 text-sm font-semibold text-[#041208] transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+                  class="rounded-xl border-0 wg-primary-fill px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
                   id="btnOpenAddContact"
                 >
                   Tambah kontak
@@ -489,7 +728,7 @@
           </div>
         </div>
         <div id="contactSubtabGroups" hidden>
-          <div id="inlineGroupsPanel" class="mb-5 rounded-xl border border-white/10 bg-black/25 p-4">
+          <div id="inlineGroupsPanel" class="mb-5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-black/25 p-4">
             <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
               <h3 class="m-0 text-base font-semibold">Kelola grup</h3>
             </div>
@@ -502,12 +741,12 @@
                   id="modalNewGroupName"
                   maxlength="100"
                   placeholder="mis. Pelanggan VIP"
-                  class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+                  class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
                 />
               </label>
               <button
                 type="button"
-                class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-4 py-2.5 text-sm font-semibold text-[#041208] transition hover:brightness-110"
+                class="rounded-xl border-0 wg-primary-fill px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
                 id="btnModalAddGroup"
               >
                 Tambah grup
@@ -518,11 +757,11 @@
                 <thead>
                   <tr>
                     <th
-                      class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
+                      class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
                     >
                       Nama
                     </th>
-                    <th class="border-b border-white/[0.08] px-3 py-2.5"></th>
+                    <th class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5"></th>
                   </tr>
                 </thead>
                 <tbody id="modalGroupsBody"></tbody>
@@ -532,12 +771,12 @@
           </div>
           </div>
         </div>
-        <div id="inlineContactPanel" hidden class="mb-5 rounded-xl border border-white/10 bg-black/25 p-4">
+        <div id="inlineContactPanel" hidden class="mb-5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-black/25 p-4">
           <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h3 class="m-0 text-base font-semibold" id="contactModalTitle">Kontak</h3>
             <button
               type="button"
-              class="rounded-lg border border-dashed border-white/20 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text"
+              class="rounded-lg border border-dashed border-slate-300 dark:border-white/20 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-wg-muted transition hover:border-solid hover:text-wg-text"
               data-close-contact="1"
             >
               Batal
@@ -552,7 +791,7 @@
                 id="modalContactName"
                 maxlength="150"
                 placeholder="Nama kontak"
-                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+                class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
               />
             </label>
             <label class="flex flex-col gap-1.5">
@@ -561,7 +800,7 @@
                 type="tel"
                 id="modalContactPhone"
                 placeholder="628…"
-                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+                class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
               />
             </label>
             <label class="flex flex-col gap-1.5">
@@ -576,14 +815,14 @@
           <div class="mt-4 flex flex-wrap justify-end gap-2">
             <button
               type="button"
-              class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text"
+              class="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-wg-muted transition hover:border-slate-300 dark:hover:border-white/[0.10] hover:bg-slate-200/90 dark:hover:bg-white/[0.07] hover:text-wg-text"
               data-close-contact="1"
             >
               Batal
             </button>
             <button
               type="button"
-              class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-4 py-2.5 text-sm font-semibold text-[#041208] transition hover:brightness-110"
+              class="rounded-xl border-0 wg-primary-fill px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
               id="btnModalContactSave"
             >
               Simpan
@@ -595,21 +834,21 @@
             <thead>
               <tr>
                 <th
-                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
                 >
                   Nama
                 </th>
                 <th
-                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
                 >
                   Nomor
                 </th>
                 <th
-                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.75rem] font-semibold uppercase tracking-wide text-wg-muted"
                 >
                   Grup
                 </th>
-                <th class="border-b border-white/[0.08] px-3 py-2.5"></th>
+                <th class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5"></th>
               </tr>
             </thead>
             <tbody id="contactsBody"></tbody>
@@ -619,53 +858,70 @@
       </section>
 
       <section
-        class="tab-panel mb-5 hidden rounded-wg border border-white/[0.08] bg-[rgba(18,26,36,0.72)] p-5 shadow-wg backdrop-blur-[16px]"
+        class="tab-panel wg-panel mb-5 hidden"
         data-panel="docs"
       >
         <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <h2 class="m-0 text-[1.05rem] font-semibold">Dokumentasi API</h2>
+          <h2 class="m-0 flex items-center gap-2.5 text-[1.05rem] font-semibold">
+            <span class="inline-flex h-5 w-5 shrink-0 text-wg-accent" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-full w-full">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" /><path d="M14 2v6h6" />
+              </svg>
+            </span>
+            <span>Dokumentasi API</span>
+          </h2>
           <span
-            class="rounded-full border border-white/[0.07] bg-white/[0.04] px-2.5 py-1 text-[0.72rem] font-semibold uppercase tracking-wider text-wg-muted"
-            >Markdown</span
+            class="rounded-full border border-slate-200 dark:border-white/[0.07] bg-white/80 dark:bg-white/[0.04] px-2.5 py-1 text-[0.72rem] font-semibold uppercase tracking-wider text-wg-muted"
           >
+            Markdown
+          </span>
         </div>
         <p class="mb-4 text-sm text-wg-muted">
-          Autentikasi: cookie sesi, <code class="rounded bg-black/35 px-1.5 py-0.5 text-[0.78em]">Authorization: Bearer &lt;jwt&gt;</code>, atau
-          <code class="rounded bg-black/35 px-1.5 py-0.5 text-[0.78em]">x-api-key</code>.
+          Autentikasi: cookie sesi, <code class="rounded bg-white dark:bg-black/35 px-1.5 py-0.5 text-[0.78em]">Authorization: Bearer &lt;jwt&gt;</code>, atau
+          <code class="rounded bg-white dark:bg-black/35 px-1.5 py-0.5 text-[0.78em]">x-api-key</code>.
         </p>
         <div class="mb-4">
           <a
-            class="inline-flex rounded-[10px] border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-wg-muted no-underline transition-colors hover:border-white/[0.15] hover:text-wg-text"
+            class="inline-flex rounded-[10px] border border-slate-200 dark:border-white/[0.08] bg-slate-100 dark:bg-white/[0.03] px-3 py-2 text-sm text-wg-muted no-underline transition-colors hover:border-slate-300 dark:hover:border-white/[0.15] hover:text-wg-text"
             href="/health"
             target="_blank"
             rel="noopener"
-            >/health</a
           >
+            /health
+          </a>
         </div>
         <pre
-          class="m-0 max-h-[min(70vh,720px)] overflow-auto whitespace-pre-wrap rounded-xl border border-white/[0.08] bg-black/35 p-4 text-[0.8rem] leading-snug"
+          class="m-0 max-h-[min(70vh,720px)] overflow-auto whitespace-pre-wrap rounded-xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-black/35 p-4 text-[0.8rem] leading-snug"
           id="docContent"
-          >Memuat…</pre
         >
+          Memuat…
+        </pre>
       </section>
 
       <section
-        class="tab-panel mb-5 hidden rounded-wg border border-white/[0.08] bg-[rgba(18,26,36,0.72)] p-5 shadow-wg backdrop-blur-[16px]"
+        class="tab-panel wg-panel mb-5 hidden"
         data-panel="profile"
       >
-        <header class="mb-5 border-b border-white/[0.06] pb-4">
-          <h2 class="m-0 text-xl font-semibold tracking-tight text-wg-text">Profil</h2>
+        <header class="mb-5 border-b border-slate-200 dark:border-white/[0.06] pb-4">
+          <h2 class="m-0 flex items-center gap-2.5 text-xl font-semibold tracking-tight text-wg-text">
+            <span class="inline-flex h-5 w-5 shrink-0 text-wg-accent" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-full w-full">
+                <circle cx="12" cy="8" r="4" /><path d="M5 21a7 7 0 0 1 14 0" />
+              </svg>
+            </span>
+            <span>Profil</span>
+          </h2>
           <p class="mt-1.5 max-w-3xl text-sm leading-relaxed text-wg-muted">Perbarui nama, email akun, dan ganti password.</p>
         </header>
         <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
-          <div class="rounded-2xl border border-white/[0.06] bg-black/[0.2] p-4">
+          <div class="rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-black/[0.2] p-4">
             <h3 class="m-0 text-[0.95rem] font-semibold text-wg-text">Update profil</h3>
             <label class="mt-3 flex flex-col gap-1.5">
               <span class="text-xs font-medium text-wg-muted">Nama</span>
               <input
                 type="text"
                 id="profileFullName"
-                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+                class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
               />
             </label>
             <label class="mt-3 flex flex-col gap-1.5">
@@ -673,25 +929,25 @@
               <input
                 type="email"
                 id="profileEmail"
-                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+                class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
               />
             </label>
             <button
               type="button"
-              class="mt-4 rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-4 py-2.5 text-sm font-semibold text-[#041208] transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+              class="mt-4 rounded-xl border-0 wg-primary-fill px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
               id="btnUpdateProfile"
             >
               Simpan profil
             </button>
           </div>
-          <div class="rounded-2xl border border-white/[0.06] bg-black/[0.2] p-4">
+          <div class="rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-black/[0.2] p-4">
             <h3 class="m-0 text-[0.95rem] font-semibold text-wg-text">Ganti password</h3>
             <label class="mt-3 flex flex-col gap-1.5">
               <span class="text-xs font-medium text-wg-muted">Password lama</span>
               <input
                 type="password"
                 id="profileCurrentPassword"
-                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+                class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
               />
             </label>
             <label class="mt-3 flex flex-col gap-1.5">
@@ -699,12 +955,12 @@
               <input
                 type="password"
                 id="profileNewPassword"
-                class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+                class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
               />
             </label>
             <button
               type="button"
-              class="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+              class="mt-4 rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-wg-muted transition hover:border-slate-300 dark:hover:border-white/[0.10] hover:bg-slate-200/90 dark:hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
               id="btnUpdatePassword"
             >
               Ubah password
@@ -714,13 +970,21 @@
       </section>
 
       <section
-        class="tab-panel mb-5 hidden rounded-wg border border-white/[0.08] bg-[rgba(18,26,36,0.72)] p-5 shadow-wg backdrop-blur-[16px]"
+        class="tab-panel wg-panel mb-5 hidden"
         data-panel="webhooks"
       >
-        <header class="mb-5 border-b border-white/[0.06] pb-4">
+        <header class="mb-5 border-b border-slate-200 dark:border-white/[0.06] pb-4">
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 class="m-0 text-xl font-semibold tracking-tight text-wg-text">Webhook per Device</h2>
+              <h2 class="m-0 flex items-center gap-2.5 text-xl font-semibold tracking-tight text-wg-text">
+                <span class="inline-flex h-5 w-5 shrink-0 text-wg-accent" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-full w-full">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                  </svg>
+                </span>
+                <span>Webhook per Device</span>
+              </h2>
               <p class="mt-1.5 max-w-3xl text-sm leading-relaxed text-wg-muted">
                 Set URL webhook untuk masing-masing device. Event yang dikirim: incoming message, outgoing message, dan test event.
               </p>
@@ -728,7 +992,7 @@
             <button
               type="button"
               id="btnWebhookBack"
-              class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-3.5 py-2 text-xs font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98]"
+              class="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.035] px-3.5 py-2 text-xs font-semibold text-wg-muted transition hover:border-slate-300 dark:hover:border-white/[0.10] hover:bg-slate-200/90 dark:hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98]"
             >
               Kembali ke device
             </button>
@@ -741,7 +1005,7 @@
             <select
               id="webhookDevice"
               data-s2-placeholder="Pilih device…"
-              class="min-h-[2.65rem] rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+              class="min-h-[2.65rem] rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
             ></select>
           </label>
 
@@ -751,7 +1015,7 @@
               type="url"
               id="webhookUrl"
               placeholder="https://example.com/webhook"
-              class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+              class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
             />
           </label>
 
@@ -764,14 +1028,14 @@
             <button
               type="button"
               id="btnWebhookSave"
-              class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-4 py-2.5 text-sm font-semibold text-[#041208] transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+              class="rounded-xl border-0 wg-primary-fill px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
             >
               Simpan webhook
             </button>
             <button
               type="button"
               id="btnWebhookTest"
-              class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+              class="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-wg-muted transition hover:border-slate-300 dark:hover:border-white/[0.10] hover:bg-slate-200/90 dark:hover:bg-white/[0.07] hover:text-wg-text active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
             >
               Test webhook
             </button>
@@ -791,12 +1055,19 @@
       </section>
 
       <section
-        class="tab-panel mb-5 hidden rounded-wg border border-white/[0.08] bg-[rgba(18,26,36,0.72)] p-5 shadow-wg backdrop-blur-[16px]"
+        class="tab-panel wg-panel mb-5 hidden"
         data-panel="users"
         id="panel-users"
       >
-        <header class="mb-5 border-b border-white/[0.06] pb-4">
-          <h2 class="m-0 text-xl font-semibold tracking-tight text-wg-text">Users</h2>
+        <header class="mb-5 border-b border-slate-200 dark:border-white/[0.06] pb-4">
+          <h2 class="m-0 flex items-center gap-2.5 text-xl font-semibold tracking-tight text-wg-text">
+            <span class="inline-flex h-5 w-5 shrink-0 text-wg-accent" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-full w-full">
+                <path d="M20 21a8 8 0 0 0-16 0" /><circle cx="12" cy="7" r="4" />
+              </svg>
+            </span>
+            <span>Users</span>
+          </h2>
           <p class="mt-1.5 max-w-3xl text-sm leading-relaxed text-wg-muted">
             Ringkasan semua pengguna: jumlah device, login terakhir, dan volume pesan yang tercatat dari API/dashboard (hari ini &amp; 7 hari).
           </p>
@@ -809,7 +1080,7 @@
             <input
               type="text"
               id="admFullName"
-              class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+              class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
             />
           </label>
           <label class="flex flex-col gap-1.5">
@@ -817,7 +1088,7 @@
             <input
               type="email"
               id="admEmail"
-              class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+              class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
             />
           </label>
           <label class="flex flex-col gap-1.5">
@@ -825,7 +1096,7 @@
             <input
               type="password"
               id="admPassword"
-              class="rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+              class="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
             />
           </label>
           <label class="flex flex-col gap-1.5">
@@ -833,7 +1104,7 @@
             <select
               id="admRole"
               data-s2-placeholder="Pilih role…"
-              class="min-h-[2.65rem] rounded-xl border border-white/10 bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
+              class="min-h-[2.65rem] rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-black/35 px-3.5 py-2.5 text-wg-text outline-none transition focus:border-wg-accent/55 focus:ring-[3px] focus:ring-wg-accent/10"
             >
               <option value="member">member</option>
               <option value="admin">admin</option>
@@ -845,65 +1116,65 @@
           </label>
           <button
             type="button"
-            class="rounded-xl border-0 bg-gradient-to-b from-wg-accent to-wg-accent-dim px-4 py-2.5 text-sm font-semibold text-[#041208] transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+            class="rounded-xl border-0 wg-primary-fill px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
             id="btnCreateUser"
           >
             Buat pengguna
           </button>
         </div>
         <h3 class="mb-3 mt-8 text-[0.95rem] font-semibold text-wg-text">Data pengguna</h3>
-        <div class="overflow-x-auto rounded-xl border border-white/[0.06] bg-black/20">
+        <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100/90 dark:bg-black/20">
           <table class="w-full border-collapse text-sm">
             <thead>
               <tr>
                 <th
-                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
                 >
                   ID
                 </th>
                 <th
-                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
                 >
                   Nama
                 </th>
                 <th
-                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
                 >
                   Email
                 </th>
                 <th
-                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
                 >
                   Role
                 </th>
                 <th
-                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
                 >
                   Device
                 </th>
                 <th
-                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
                 >
                   Terakhir login
                 </th>
                 <th
-                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
                   title="Pesan tercatat hari ini (timezone server)"
                 >
                   Pesan hari ini
                 </th>
                 <th
-                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
                   title="7 hari terakhir"
                 >
                   7 hari
                 </th>
                 <th
-                  class="border-b border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
+                  class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5 text-left text-[0.72rem] font-semibold uppercase tracking-wide text-wg-muted"
                 >
                   API key
                 </th>
-                <th class="border-b border-white/[0.08] px-3 py-2.5"></th>
+                <th class="border-b border-slate-200 dark:border-white/[0.08] px-3 py-2.5"></th>
               </tr>
             </thead>
             <tbody id="usersBody"></tbody>
@@ -911,27 +1182,28 @@
         </div>
 
       </section>
-    </main>
+      </main>
 
-    <footer class="relative z-[1] mx-auto max-w-[1180px] px-6 pb-8">
-      <p class="m-0 text-center text-xs text-wg-muted/80">Labudda - Karena Digital Bukan Pilihan</p>
-    </footer>
+      <footer class="relative z-[1] mx-auto w-full max-w-[1440px] px-4 pb-8 sm:px-6">
+        <p class="m-0 text-center text-xs text-wg-muted/80">Labudda - Karena Digital Bukan Pilihan</p>
+      </footer>
+    </div>
 
     <div
       id="confirmModal"
-      class="fixed inset-0 z-[2147483647] hidden items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
+      class="fixed inset-0 z-[2147483647] hidden items-center justify-center bg-gradient-to-br from-slate-900/55 via-slate-900/42 to-slate-950/58 p-4 backdrop-blur-[10px] dark:from-black/58 dark:via-black/48 dark:to-black/62"
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirmModalTitle"
     >
-      <div class="w-full max-w-md rounded-2xl border border-white/[0.1] bg-[rgba(18,26,36,0.95)] p-5 shadow-wg">
+      <div class="wg-modal w-full max-w-md">
         <h3 id="confirmModalTitle" class="m-0 text-base font-semibold text-wg-text">Konfirmasi</h3>
         <p id="confirmModalText" class="mb-0 mt-2 text-sm leading-relaxed text-wg-muted"></p>
         <div class="mt-5 flex justify-end gap-2">
           <button
             type="button"
             id="btnConfirmNo"
-            class="rounded-xl border border-white/[0.06] bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-wg-muted transition hover:border-white/[0.10] hover:bg-white/[0.07] hover:text-wg-text"
+            class="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.035] px-4 py-2.5 text-sm font-semibold text-wg-muted transition hover:border-slate-300 dark:hover:border-white/[0.10] hover:bg-slate-200/90 dark:hover:bg-white/[0.07] hover:text-wg-text"
           >
             Batal
           </button>

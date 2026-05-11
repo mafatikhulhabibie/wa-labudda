@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: ['./public/**/*.{html,js}'],
   theme: {
     extend: {
@@ -8,12 +9,12 @@ export default {
       },
       colors: {
         wg: {
-          bg0: '#0a0f14',
-          bg1: '#0f1620',
-          text: '#e8eef5',
-          muted: '#8b9cb0',
-          accent: '#25d366',
-          'accent-dim': '#1aa34e',
+          bg0: 'rgb(var(--wg-bg0) / <alpha-value>)',
+          bg1: 'rgb(var(--wg-bg1) / <alpha-value>)',
+          text: 'rgb(var(--wg-text) / <alpha-value>)',
+          muted: 'rgb(var(--wg-muted) / <alpha-value>)',
+          accent: 'rgb(var(--wg-accent) / <alpha-value>)',
+          'accent-dim': 'rgb(var(--wg-accent-dim) / <alpha-value>)',
           danger: '#f87171',
           warn: '#fbbf24',
           info: '#38bdf8',

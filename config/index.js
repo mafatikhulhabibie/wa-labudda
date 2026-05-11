@@ -44,8 +44,8 @@ export function getConfig() {
     rateLimitWindowMs: intEnv('RATE_LIMIT_WINDOW_MS', 60_000),
     /** Optional: POST JSON for each incoming message (messages.upsert) */
     webhookIncomingMessageUrl: process.env.WEBHOOK_INCOMING_MESSAGE_URL?.trim() || '',
-    /** Device webhook payload format: default | fonnte */
-    webhookPayloadMode: enumEnv('WEBHOOK_PAYLOAD_MODE', ['default', 'fonnte'], 'default'),
+    /** Device webhook payload format: default (hanya nested) | fonnte (nested + field root ala Fonnte) */
+    webhookPayloadMode: enumEnv('WEBHOOK_PAYLOAD_MODE', ['default', 'fonnte'], 'fonnte'),
     /** Fonnte-like payload: normalize sender/member to digit-only phone */
     webhookNormalizeSenderDigits: boolEnv('WEBHOOK_NORMALIZE_SENDER_DIGITS', false),
     /** Queue backend label for ops / future BullMQ wiring */

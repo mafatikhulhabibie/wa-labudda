@@ -1,3 +1,385 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /* Default: prioritas dark (tanpa kelas html.light) */
+  :root {
+    color-scheme: dark;
+    --wg-bg0: 10 15 20;
+    --wg-bg1: 15 22 32;
+    --wg-text: 232 238 245;
+    --wg-muted: 139 156 176;
+    --wg-accent: 37 211 102;
+    --wg-accent-dim: 26 163 78;
+    --wg-hi: 56 189 248;
+  }
+
+  html.light {
+    color-scheme: light;
+    --wg-bg0: 248 250 252;
+    --wg-bg1: 241 245 249;
+    --wg-text: 15 23 42;
+    --wg-muted: 100 116 139;
+    --wg-accent: 22 163 74;
+    --wg-accent-dim: 21 128 61;
+    --wg-hi: 14 165 233;
+  }
+}
+
+@layer components {
+  /* Latar halaman: beberapa radial dengan transisi panjang */
+  .wg-page-bg {
+    background-color: rgb(var(--wg-bg0) / 1);
+    background-image:
+      radial-gradient(ellipse 135% 100% at -12% -28%, rgb(var(--wg-bg1) / 0.78) 0%, rgb(var(--wg-bg1) / 0.22) 42%, transparent 72%),
+      radial-gradient(ellipse 95% 78% at 108% -8%, rgb(var(--wg-accent) / 0.18) 0%, rgb(var(--wg-accent) / 0.06) 36%, transparent 64%),
+      radial-gradient(ellipse 85% 70% at 50% 118%, rgb(var(--wg-hi) / 0.12) 0%, rgb(var(--wg-hi) / 0.03) 38%, transparent 66%),
+      radial-gradient(ellipse 55% 48% at 0% 92%, rgb(var(--wg-accent) / 0.09) 0%, transparent 58%);
+  }
+
+  html.light .wg-page-bg {
+    background-image:
+      radial-gradient(ellipse 130% 95% at -8% -22%, rgb(var(--wg-bg1) / 1) 0%, rgb(var(--wg-bg1) / 0.35) 44%, transparent 74%),
+      radial-gradient(ellipse 100% 80% at 102% 0%, rgb(var(--wg-accent) / 0.16) 0%, rgb(34 197 94 / 0.05) 40%, transparent 68%),
+      radial-gradient(ellipse 90% 72% at 48% 108%, rgb(var(--wg-hi) / 0.14) 0%, rgb(14 165 233 / 0.04) 42%, transparent 70%),
+      radial-gradient(ellipse 60% 50% at 5% 95%, rgb(148 163 184 / 0.14) 0%, transparent 60%);
+  }
+
+  .wg-grid-overlay {
+    background-size: 48px 48px;
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.035) 1px, transparent 1px);
+    mask-image: radial-gradient(ellipse 85% 70% at 50% 22%, black 0%, black 18%, transparent 72%);
+  }
+
+  html.light .wg-grid-overlay {
+    background-image:
+      linear-gradient(rgb(15 23 42 / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(15 23 42 / 0.06) 1px, transparent 1px);
+  }
+
+  /* Orbs: radial halus (bukan fill solid + blur keras) */
+  .wg-orb-tl {
+    background: radial-gradient(
+      ellipse at 35% 30%,
+      rgb(var(--wg-accent) / 0.38) 0%,
+      rgb(var(--wg-accent) / 0.12) 32%,
+      rgb(var(--wg-hi) / 0.08) 52%,
+      transparent 72%
+    );
+  }
+
+  .wg-orb-br {
+    background: radial-gradient(
+      ellipse at 65% 65%,
+      rgb(var(--wg-hi) / 0.28) 0%,
+      rgb(var(--wg-accent) / 0.1) 40%,
+      transparent 70%
+    );
+  }
+
+  html.light .wg-orb-tl {
+    background: radial-gradient(
+      ellipse at 35% 30%,
+      rgb(var(--wg-accent) / 0.22) 0%,
+      rgb(34 197 94 / 0.08) 45%,
+      transparent 72%
+    );
+  }
+
+  html.light .wg-orb-br {
+    background: radial-gradient(
+      ellipse at 62% 62%,
+      rgb(var(--wg-hi) / 0.2) 0%,
+      rgb(14 165 233 / 0.06) 48%,
+      transparent 74%
+    );
+  }
+
+  .wg-sidebar-shell {
+    backdrop-filter: blur(18px) saturate(1.12);
+    -webkit-backdrop-filter: blur(18px) saturate(1.12);
+    background-image: linear-gradient(
+      175deg,
+      rgb(14 18 26 / 0.86) 0%,
+      rgb(11 15 22 / 0.78) 45%,
+      rgb(8 12 18 / 0.72) 100%
+    );
+  }
+
+  html.light .wg-sidebar-shell {
+    background-image: linear-gradient(
+      178deg,
+      rgb(255 255 255 / 0.78) 0%,
+      rgb(252 253 255 / 0.68) 40%,
+      rgb(248 250 252 / 0.62) 100%
+    );
+  }
+
+  .wg-panel {
+    border-radius: 18px;
+    padding: 1.25rem;
+    backdrop-filter: blur(22px) saturate(1.18);
+    -webkit-backdrop-filter: blur(22px) saturate(1.18);
+    border: 1px solid rgb(255 255 255 / 0.14);
+    background-image: linear-gradient(
+      168deg,
+      rgb(26 34 48 / 0.5) 0%,
+      rgb(20 28 38 / 0.42) 48%,
+      rgb(14 20 30 / 0.36) 100%
+    );
+    box-shadow:
+      0 16px 48px rgb(0 0 0 / 0.22),
+      0 6px 20px rgb(0 0 0 / 0.12),
+      0 1px 0 rgb(255 255 255 / 0.08) inset;
+  }
+
+  html.light .wg-panel {
+    border-color: rgb(255 255 255 / 0.7);
+    background-image: linear-gradient(
+      168deg,
+      rgb(255 255 255 / 0.7) 0%,
+      rgb(255 255 255 / 0.48) 42%,
+      rgb(248 252 255 / 0.52) 100%
+    );
+    box-shadow:
+      0 16px 44px rgb(15 23 42 / 0.09),
+      0 6px 16px rgb(15 23 42 / 0.05),
+      0 1px 0 rgb(255 255 255 / 0.9) inset,
+      0 0 0 1px rgb(15 23 42 / 0.03);
+  }
+
+  .wg-modal {
+    border-radius: 1rem;
+    padding: 1.25rem;
+    border: 1px solid rgb(255 255 255 / 0.1);
+    background-image: linear-gradient(
+      168deg,
+      rgb(28 36 50 / 0.94) 0%,
+      rgb(18 24 34 / 0.9) 55%,
+      rgb(14 20 28 / 0.88) 100%
+    );
+    box-shadow: 0 24px 80px rgb(0 0 0 / 0.5);
+  }
+
+  html.light .wg-modal {
+    border-color: rgb(226 232 240);
+    background-image: linear-gradient(
+      168deg,
+      rgb(255 255 255 / 0.99) 0%,
+      rgb(248 250 252 / 0.97) 100%
+    );
+    box-shadow: 0 8px 40px rgb(15 23 42 / 0.08);
+  }
+
+  .wg-logo-mesh {
+    background-image:
+      radial-gradient(ellipse 85% 85% at 18% 12%, rgb(var(--wg-accent) / 0.38) 0%, transparent 58%),
+      radial-gradient(ellipse 75% 75% at 88% 88%, rgb(var(--wg-hi) / 0.14) 0%, transparent 52%),
+      linear-gradient(152deg, rgb(var(--wg-accent) / 0.22) 0%, rgb(var(--wg-accent) / 0.05) 100%);
+  }
+
+  .wg-nav-active {
+    background-image: linear-gradient(
+      92deg,
+      rgb(var(--wg-accent) / 0.26) 0%,
+      rgb(var(--wg-accent) / 0.1) 55%,
+      rgb(var(--wg-accent) / 0.05) 100%
+    );
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset;
+  }
+
+  html.light .wg-nav-active {
+    background-image: linear-gradient(
+      92deg,
+      rgb(var(--wg-accent) / 0.16) 0%,
+      rgb(var(--wg-accent) / 0.07) 52%,
+      rgb(var(--wg-accent) / 0.03) 100%
+    );
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.45) inset;
+  }
+
+  .wg-primary-fill {
+    color: rgb(255 255 255 / 0.98);
+    background-image: linear-gradient(
+      162deg,
+      rgb(var(--wg-accent) / 1) 0%,
+      color-mix(in srgb, rgb(var(--wg-accent) / 1) 42%, rgb(var(--wg-accent-dim) / 1)) 48%,
+      rgb(var(--wg-accent-dim) / 1) 100%
+    );
+    box-shadow:
+      0 6px 22px rgb(var(--wg-accent) / 0.22),
+      0 1px 0 rgb(255 255 255 / 0.28) inset;
+  }
+
+  .wg-theme-toggle {
+    background-image: linear-gradient(
+      158deg,
+      rgb(var(--wg-bg1) / 0.65) 0%,
+      rgb(var(--wg-bg0) / 0.45) 100%
+    );
+    border: 1px solid rgb(255 255 255 / 0.1);
+  }
+
+  html.light .wg-theme-toggle {
+    border-color: rgb(226 232 240);
+    background-image: linear-gradient(
+      158deg,
+      rgb(241 245 249 / 1) 0%,
+      rgb(226 232 240 / 0.88) 100%
+    );
+  }
+
+  .dashboard-topbar {
+    padding: 0.85rem 1rem 0.35rem;
+    background: transparent;
+  }
+
+  @media (min-width: 768px) {
+    .dashboard-topbar {
+      padding: 1.1rem 1.25rem 0.4rem;
+    }
+  }
+
+  .dashboard-topbar-inner {
+    padding: 0.45rem 0.65rem 0.45rem 0.85rem;
+    border-radius: 1rem;
+    border: 1px solid rgb(255 255 255 / 0.14);
+    background-image: linear-gradient(150deg, rgb(22 30 42 / 0.72) 0%, rgb(14 20 30 / 0.55) 100%);
+    backdrop-filter: blur(20px) saturate(1.25);
+    -webkit-backdrop-filter: blur(20px) saturate(1.25);
+    box-shadow:
+      0 8px 32px rgb(0 0 0 / 0.28),
+      0 2px 8px rgb(0 0 0 / 0.12),
+      0 1px 0 rgb(255 255 255 / 0.07) inset,
+      0 0 0 1px rgb(0 0 0 / 0.18);
+  }
+
+  html.light .dashboard-topbar-inner {
+    border-color: rgb(255 255 255 / 0.62);
+    background-image: linear-gradient(145deg, rgb(255 255 255 / 0.76) 0%, rgb(248 250 252 / 0.52) 100%);
+    box-shadow:
+      0 10px 36px rgb(15 23 42 / 0.1),
+      0 3px 10px rgb(15 23 42 / 0.05),
+      0 1px 0 rgb(255 255 255 / 0.95) inset,
+      0 0 0 1px rgb(15 23 42 / 0.04);
+  }
+
+  .wg-glass-popover {
+    border-radius: 0.875rem;
+    border: 1px solid rgb(255 255 255 / 0.12);
+    background-image: linear-gradient(160deg, rgb(28 36 48 / 0.92) 0%, rgb(16 22 32 / 0.86) 100%);
+    backdrop-filter: blur(18px) saturate(1.2);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow:
+      0 18px 50px rgb(0 0 0 / 0.4),
+      0 1px 0 rgb(255 255 255 / 0.08) inset;
+  }
+
+  html.light .wg-glass-popover {
+    border-color: rgb(226 232 240 / 0.95);
+    background-image: linear-gradient(165deg, rgb(255 255 255 / 0.9) 0%, rgb(248 250 252 / 0.82) 100%);
+    box-shadow:
+      0 18px 48px rgb(15 23 42 / 0.12),
+      0 1px 0 rgb(255 255 255 / 0.9) inset;
+  }
+
+  /* Sidebar: rail (default) vs expanded — hanya lg+; md tetap lebar penuh + teks */
+  #btnSidebarToggle .sidebar-ico-expand {
+    display: block;
+  }
+  #btnSidebarToggle .sidebar-ico-collapse {
+    display: none;
+  }
+  body.wg-sidebar-expanded #btnSidebarToggle .sidebar-ico-expand {
+    display: none;
+  }
+  body.wg-sidebar-expanded #btnSidebarToggle .sidebar-ico-collapse {
+    display: block;
+  }
+
+  @media (min-width: 1024px) {
+    #dashboard-sidebar {
+      width: 88px;
+      align-items: center;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+      transition:
+        width 0.22s ease,
+        padding-left 0.22s ease,
+        padding-right 0.22s ease;
+    }
+
+    body.wg-sidebar-expanded #dashboard-sidebar {
+      width: 280px;
+      align-items: stretch;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    body:not(.wg-sidebar-expanded) #dashboard-sidebar .sidebar-nav-text {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    body.wg-sidebar-expanded #dashboard-sidebar .sidebar-nav-text {
+      position: static !important;
+      width: auto !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: visible !important;
+      clip: auto !important;
+      clip-path: none !important;
+      white-space: nowrap;
+      border-width: 0 !important;
+      opacity: 1;
+      visibility: visible;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    body:not(.wg-sidebar-expanded) #dashboard-sidebar .sidebar-header-logo {
+      justify-content: center;
+    }
+
+    body.wg-sidebar-expanded #dashboard-sidebar .sidebar-header-logo {
+      justify-content: flex-start;
+    }
+
+    #dashboard-sidebar .sidebar-nav-item {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    body:not(.wg-sidebar-expanded) #dashboard-sidebar .sidebar-nav-item {
+      justify-content: center;
+      gap: 0;
+      border-left-width: 0 !important;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+
+    body.wg-sidebar-expanded #dashboard-sidebar .sidebar-nav-item {
+      justify-content: flex-start;
+      border-left-width: 3px;
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+      padding-top: 0.625rem;
+      padding-bottom: 0.625rem;
+    }
+  }
+}
