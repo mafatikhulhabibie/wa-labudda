@@ -48,6 +48,10 @@ export function getConfig() {
     webhookPayloadMode: enumEnv('WEBHOOK_PAYLOAD_MODE', ['default', 'fonnte'], 'fonnte'),
     /** Fonnte-like payload: normalize sender/member to digit-only phone */
     webhookNormalizeSenderDigits: boolEnv('WEBHOOK_NORMALIZE_SENDER_DIGITS', false),
+    /** Jika true: response HTTP 2xx dari URL device webhook boleh berisi JSON { "reply": "..." } (juga reply_text / message) → gateway kirim ke chat yang sama tanpa /api/send */
+    webhookReplyFromBody: boolEnv('WEBHOOK_REPLY_FROM_BODY', false),
+    /** Potong teks balasan dari body webhook agar tidak membengkak */
+    webhookReplyMaxLen: intEnv('WEBHOOK_REPLY_MAX_LEN', 4000),
     /** Queue backend label for ops / future BullMQ wiring */
     queueDriver: process.env.QUEUE_DRIVER || 'memory',
 

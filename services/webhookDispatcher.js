@@ -102,13 +102,41 @@ export function buildWebhookPostBody(sessionId, event, data) {
 }
 
 /**
+ * Body response webhook JSON: ambil teks balasan jika ada (reply / reply_text / message string).
+ * @param {string} raw
+ * @param {number} maxLen
+ * @returns {string | null}
+ */
+export function extractReplyTextFromWebhookResponse(raw, maxLen) {
+  const s = String(raw || '').trim();
+  if (!s || s[0] !== '{') return null;
+  const slice = s.length > 65536 ? s.slice(0, 65536) : s;
+  let obj;
+  try {
+    obj = JSON.parse(slice);
+  } catch {
+    return null;
+  }
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return null;
+  const reply = obj.reply ?? obj.reply_text ?? obj.message;
+  if (typeof reply !== 'string') return null;
+  const t = reply.trim();
+  if (!t) return null;
+  return t.length > maxLen ? t.slice(0, maxLen) : t;
+}
+
+/**
  * @param {string} sessionId
  * @param {string} event
  * @param {unknown} data
+ * @returns {Promise<{ dispatched: boolean, reason?: string, status?: number, replyText: string | null }>}
  */
 export async function dispatchDeviceWebhook(sessionId, event, data) {
+  const cfg = getConfig();
   const hook = await getWebhookBySessionId(sessionId);
-  if (!hook || !hook.enabled || !hook.url) return { dispatched: false, reason: 'disabled_or_missing' };
+  if (!hook || !hook.enabled || !hook.url) {
+    return { dispatched: false, reason: 'disabled_or_missing', replyText: null };
+  }
 
   const payload = buildWebhookPostBody(sessionId, event, data);
 
@@ -119,6 +147,16 @@ export async function dispatchDeviceWebhook(sessionId, event, data) {
     signal: AbortSignal.timeout(15_000),
   });
 
+  let replyText = null;
+  if (res.ok && cfg.webhookReplyFromBody && event === 'message.incoming') {
+    try {
+      const rawBody = await res.text();
+      replyText = extractReplyTextFromWebhookResponse(rawBody, cfg.webhookReplyMaxLen);
+    } catch (err) {
+      logger.warn({ err, sessionId, event, url: hook.url }, 'device webhook reply body read failed');
+    }
+  }
+
   if (!res.ok) {
     logger.warn(
       { sessionId, event, status: res.status, url: hook.url },
@@ -126,5 +164,5 @@ export async function dispatchDeviceWebhook(sessionId, event, data) {
     );
   }
 
-  return { dispatched: true, status: res.status };
+  return { dispatched: true, status: res.status, replyText };
 }

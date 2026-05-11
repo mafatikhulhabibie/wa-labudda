@@ -197,6 +197,14 @@ Opsional, untuk format lebih mirip provider eksternal:
 
 - `WEBHOOK_NORMALIZE_SENDER_DIGITS=true` → field `sender` dan `member` akan dinormalisasi jadi digit-only (mis. `628123...`) tanpa suffix `@s.whatsapp.net`.
 
+### Balasan otomatis dari body response (opsional)
+
+Jika di env gateway **`WEBHOOK_REPLY_FROM_BODY=true`**, setelah `POST` ke URL webhook device berhasil (HTTP **2xx**), gateway membaca body response sebagai JSON dan mencari **string** tidak kosong pada salah satu field: **`reply`**, **`reply_text`**, atau **`message`**. Teks itu dikirim ke **chat yang sama** (JID dari pesan masuk). Dengan mode ini skrip penerima **tidak perlu** memanggil `POST /api/send` (berguna jika otorisasi API atau jaringan mempersulit callback ke gateway).
+
+- Jika balasan dari webhook **berhasil** dikirim, autoresponder dashboard untuk batch pesan itu **tidak** dijalankan.
+- Opsi: **`WEBHOOK_REPLY_MAX_LEN`** (default 4000) membatasi panjang teks.
+- Contoh skrip penerima: `docs/webhook_reply_body_example.php` atau server uji `scripts/webhook-reply-echo.mjs`.
+
 Event yang tersedia:
 
 - `message.outgoing` — ketika API/dashboard mengirim pesan

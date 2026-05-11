@@ -8,7 +8,8 @@
     "start": "node app.js",
     "dev": "node --watch app.js",
     "build:css": "postcss src/tailwind.css -o public/styles.css",
-    "watch:css": "postcss src/tailwind.css -o public/styles.css --watch"
+    "watch:css": "postcss src/tailwind.css -o public/styles.css --watch",
+    "webhook-echo": "node scripts/webhook-reply-echo.mjs"
   },
   "engines": {
     "node": ">=18.0.0"

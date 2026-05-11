@@ -294,15 +294,38 @@ class ManagedSession {
         }
       }
       const webhookData = buildIncomingWebhookData(this.sessionId, payload);
-      await dispatchDeviceWebhook(this.sessionId, 'message.incoming', webhookData).catch(() => {});
+      let replyFromWebhook = null;
       try {
-        await processIncomingAutoReply({
-          sessionId: this.sessionId,
-          payload,
-          sendTextToJid: (sid, jid, text) => this.manager.sendTextToJid(sid, jid, text),
-        });
+        const wh = await dispatchDeviceWebhook(this.sessionId, 'message.incoming', webhookData);
+        replyFromWebhook = wh?.replyText || null;
       } catch (err) {
-        logger.warn({ err, sessionId: this.sessionId }, 'auto responder handler failed');
+        logger.warn({ err, sessionId: this.sessionId }, 'device webhook dispatch failed');
+      }
+
+      let sentFromWebhookReply = false;
+      const jid = webhookData?.primary?.remote_jid
+        ? String(webhookData.primary.remote_jid).trim()
+        : '';
+      if (replyFromWebhook && jid && jid !== 'status@broadcast') {
+        try {
+          await this.manager.sendTextToJid(this.sessionId, jid, replyFromWebhook);
+          sentFromWebhookReply = true;
+          logger.info({ sessionId: this.sessionId, jidLen: jid.length }, 'webhook JSON reply sent');
+        } catch (err) {
+          logger.warn({ err, sessionId: this.sessionId, jid }, 'webhook JSON reply send failed');
+        }
+      }
+
+      if (!sentFromWebhookReply) {
+        try {
+          await processIncomingAutoReply({
+            sessionId: this.sessionId,
+            payload,
+            sendTextToJid: (sid, jidInner, text) => this.manager.sendTextToJid(sid, jidInner, text),
+          });
+        } catch (err) {
+          logger.warn({ err, sessionId: this.sessionId }, 'auto responder handler failed');
+        }
       }
       try {
         await this.manager._relayUiIncoming(this.sessionId, payload);
